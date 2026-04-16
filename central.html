@@ -3,89 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Personal APO - Central</title>
+    <title>Gestión de Personal APO</title>
     <style>
-        :root {
-            --primario: #003366;
-            --secundario: #00509d;
-            --acento: #00b1b2;
-            --luz: #f4f7f9;
-            --blanco: #ffffff;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background-color: var(--luz);
-        }
-
-        /* Barra de Navegación Superior */
-        .navbar {
-            background-color: var(--primario);
-            color: var(--blanco);
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-nav {
-            background-color: var(--acento);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        .btn-nav:hover {
-            background-color: #008c8d;
-        }
-
-        .btn-secondary {
-            background-color: rgba(255,255,255,0.2);
-        }
-
-        /* Contenedor del Iframe para cargar las herramientas */
-        .content-frame {
-            width: 100%;
-            height: calc(100vh - 60px);
-            border: none;
-        }
+        body { font-family: sans-serif; margin: 0; overflow: hidden; }
+        .navbar { background: #003366; color: white; padding: 10px; display: flex; gap: 15px; align-items: center; }
+        .btn { background: #00b1b2; color: white; border: none; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-weight: bold; cursor: pointer; }
+        .btn-sec { background: rgba(255,255,255,0.2); }
+        iframe { width: 100%; height: calc(100vh - 50px); border: none; }
     </style>
 </head>
 <body>
-
     <div class="navbar">
-        <div class="navbar-brand">Área Programática Oeste - Gestión</div>
-        <div class="nav-buttons">
-            <a href="index.html" class="btn-nav">Coberturas</a>
-            <a href="LIBRES_V8_APO.html" class="btn-nav btn-secondary">Auditoría Libres</a>
-        </div>
+        <div style="font-weight:bold; margin-right:20px;">APO - Gestión</div>
+        <a href="coberturas.html" target="marco" class="btn">Coberturas</a>
+        <a href="LIBRES_V8_APO.html" target="marco" class="btn btn-sec">Auditoría Libres</a>
     </div>
-
-    <iframe name="mainFrame" src="index.html" class="content-frame" id="frame"></iframe>
-
-    <script>
-        // Función simple para cambiar el contenido del marco
-        const frame = document.getElementById('frame');
-        
-        // Evitar bucle infinito si el index intenta cargarse a sí mismo en el iframe
-        // En una implementación real, podrías separar el menú de los contenidos
-    </script>
+    <iframe name="marco" src="coberturas.html"></iframe>
 </body>
 </html>
