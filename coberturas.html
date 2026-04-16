@@ -7,66 +7,80 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f0f4f7; margin: 0; padding: 0; }
-        .header-bar { background-color: #003366; color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .container { max-width: 1100px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #003366; border-bottom: 3px solid #00b1b2; padding-bottom: 10px; margin-top: 0; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; background: #f9f9f9; padding: 20px; border-radius: 8px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-weight: bold; margin-bottom: 8px; color: #333; }
-        input, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        .full-width { grid-column: 1 / -1; }
-        .actions { display: flex; gap: 15px; margin-bottom: 30px; }
-        button { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-reg { background-color: #003366; color: white; }
-        .btn-reg:hover { background-color: #00509d; }
-        .btn-excel { background-color: #28a745; color: white; }
-        .btn-excel:hover { background-color: #218838; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background-color: #00b1b2; color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        tr:nth-child(even) { background-color: #fcfcfc; }
-        .footer-text { text-align: center; margin-top: 40px; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 15px; }
+        
+        /* Barra superior azul */
+        .nav-header { background-color: #003366; color: white; padding: 10px 20px; display: flex; align-items: center; font-size: 14px; }
+        .nav-header span { margin-left: auto; }
+
+        /* Contenedor principal (Tarjeta blanca) */
+        .main-card { max-width: 1000px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        
+        h2 { color: #003366; border-bottom: 2px solid #00b1b2; padding-bottom: 15px; margin-top: 0; font-size: 24px; }
+
+        /* Formulario Estilo Original */
+        .grid-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 25px; }
+        .form-item { display: flex; flex-direction: column; }
+        .form-item.wide { grid-column: span 3; }
+        
+        label { font-weight: bold; margin-bottom: 8px; color: #333; font-size: 14px; }
+        input, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: #fafafa; }
+        input:focus { border-color: #00b1b2; outline: none; background: white; }
+
+        /* Botones Originales */
+        .btn-container { display: flex; gap: 15px; margin: 30px 0; }
+        button { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .btn-blue { background-color: #003366; color: white; }
+        .btn-green { background-color: #28a745; color: white; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Tabla Original */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background-color: #00b1b2; color: white; padding: 15px; text-align: left; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+        td { padding: 15px; border-bottom: 1px solid #eee; color: #555; font-size: 14px; }
+        tr:hover { background-color: #f9f9f9; }
+
+        .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #aaa; }
     </style>
 </head>
 <body>
 
-<div class="header-bar">
+<div class="nav-header">
     <strong>APO - Gestión de Personal</strong>
     <span>SIPROSA - Tucumán</span>
 </div>
 
-<div class="container">
+<div class="main-card">
     <h2>Registro de Cobertura de Cargos</h2>
     
-    <div class="form-grid">
-        <div class="form-group">
+    <div class="grid-form">
+        <div class="form-item">
             <label>Nombre del Agente:</label>
             <input type="text" id="nombre" placeholder="Apellido y Nombre">
         </div>
-        <div class="form-group">
+        <div class="form-item">
             <label>DNI:</label>
             <input type="text" id="dni">
         </div>
-        <div class="form-group">
+        <div class="form-item">
             <label>Función / Cargo:</label>
             <input type="text" id="cargo">
         </div>
-        <div class="form-group">
+        <div class="form-item wide">
             <label>Vigencia:</label>
             <input type="text" id="vigencia" placeholder="Desde - Hasta">
         </div>
-        <div class="form-group full-width">
+        <div class="form-item wide">
             <label>Observaciones:</label>
-            <textarea id="obs" rows="2" placeholder="Motivo del reemplazo, titular, etc."></textarea>
+            <textarea id="obs" rows="3" placeholder="Motivo del reemplazo, titular, etc."></textarea>
         </div>
     </div>
 
-    <div class="actions">
-        <button class="btn-reg" onclick="registrar()">Registrar en Tabla</button>
-        <button class="btn-excel" onclick="descargarExcel()">Descargar Reporte Excel</button>
+    <div class="btn-container">
+        <button class="btn-blue" onclick="saveData()">Registrar en Tabla</button>
+        <button class="btn-green" onclick="exportExcel()">Descargar Reporte Excel</button>
     </div>
 
-    <table id="tablaDatos">
+    <table id="mainTable">
         <thead>
             <tr>
                 <th>Fecha Carga</th>
@@ -77,23 +91,23 @@
                 <th>Observaciones</th>
             </tr>
         </thead>
-        <tbody id="cuerpoTabla"></tbody>
+        <tbody id="tableBody"></tbody>
     </table>
 
-    <div class="footer-text">
+    <div class="footer">
         Área Programática Oeste | Hospitales y CAPS | Departamento de Personal
     </div>
 </div>
 
 <script>
-    // Al abrir la página, cargar lo que ya estaba guardado
+    // Cargar datos al iniciar
     window.onload = function() {
-        const datos = JSON.parse(localStorage.getItem('coberturas_apo') || '[]');
-        datos.reverse().forEach(d => mostrarEnTabla(d));
+        const stored = JSON.parse(localStorage.getItem('apo_data') || '[]');
+        stored.reverse().forEach(item => addRow(item));
     };
 
-    function registrar() {
-        const d = {
+    function saveData() {
+        const item = {
             fecha: new Date().toLocaleDateString(),
             nombre: document.getElementById('nombre').value,
             dni: document.getElementById('dni').value,
@@ -102,29 +116,26 @@
             obs: document.getElementById('obs').value
         };
 
-        if(!d.nombre) return alert("Por favor, ingrese al menos el nombre.");
+        if(!item.nombre) return alert("Por favor, ingrese el nombre.");
 
-        // Guardar en memoria local
-        const lista = JSON.parse(localStorage.getItem('coberturas_apo') || '[]');
-        lista.push(d);
-        localStorage.setItem('coberturas_apo', JSON.stringify(lista));
+        const list = JSON.parse(localStorage.getItem('apo_data') || '[]');
+        list.push(item);
+        localStorage.setItem('apo_data', JSON.stringify(list));
 
-        mostrarEnTabla(d, true);
-        
-        // Limpiar campos
+        addRow(item, true);
         document.querySelectorAll('input, textarea').forEach(el => el.value = '');
     }
 
-    function mostrarEnTabla(d, alInicio = false) {
-        const tabla = document.getElementById('cuerpoTabla');
-        const fila = tabla.insertRow(alInicio ? 0 : -1);
-        fila.innerHTML = `<td>${d.fecha}</td><td>${d.nombre}</td><td>${d.dni}</td><td>${d.cargo}</td><td>${d.vigencia}</td><td>${d.obs}</td>`;
+    function addRow(item, isNew = false) {
+        const body = document.getElementById('tableBody');
+        const row = body.insertRow(isNew ? 0 : -1);
+        row.innerHTML = `<td>${item.fecha}</td><td>${item.nombre}</td><td>${item.dni}</td><td>${item.cargo}</td><td>${item.vigencia}</td><td>${item.obs}</td>`;
     }
 
-    function descargarExcel() {
-        const tabla = document.getElementById("tablaDatos");
-        const libro = XLSX.utils.table_to_book(tabla, {sheet: "Coberturas"});
-        XLSX.writeFile(libro, "Coberturas_APO_" + new Date().toLocaleDateString() + ".xlsx");
+    function exportExcel() {
+        const table = document.getElementById("mainTable");
+        const wb = XLSX.utils.table_to_book(table, {sheet: "Registros"});
+        XLSX.writeFile(wb, "Reporte_Coberturas_APO.xlsx");
     }
 </script>
 
