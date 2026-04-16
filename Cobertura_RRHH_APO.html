@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cobertura de Servicio APO - V5 (Estadísticas y Multirregistro)</title>
+    <style>
+        :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; --warning: #ffc107; --danger: #dc3545; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 450px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
+        .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 10px; border-radius: 4px; }
+        
+        .section { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
+        .section-title { font-size: 0.7rem; font-weight: bold; color: var(--secondary); margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #ddd; }
+        
+        .form-group { margin-bottom: 8px; }
+        .row { display: flex; gap: 8px; }
+        .row > .form-group { flex: 1; }
+        
+        label { display: block; font-size: 0.65rem; font-weight: bold; margin-bottom: 2px; color: #444; }
+        input, select, textarea { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; }
+        
+        .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
+        .btn-update { background: var(--warning); color: black; display: none; }
+        .btn-edit { background: var(--warning); border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.65rem; font-weight: bold; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.65rem; margin-left: 5px; }
+
+        .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; }
+        .search-container { background: #e1e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-left: 5px solid var(--primary); }
+        .search-input { flex-grow: 1; padding: 10px; border: 2px solid var(--primary); border-radius: 4px; font-size: 1rem; font-weight: bold; }
+        
+        .table-container { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: auto; flex-grow: 1; border: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.68rem; }
+        th { background: var(--primary); color: white; position: sticky; top: 0; padding: 10px; text-align: left; z-index: 10; white-space: nowrap; }
+        td { padding: 8px; border-bottom: 1px solid #eee; white-space: nowrap; }
+        
+        .status-autorizado { background-color: #d4edda !important; color: #155724; }
+        .status-baja { background-color: #f8d7da !important; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"><h2>COBERTURAS APO - V5</h2></div>
+    
+    <form id="coberturaForm">
+        <input type="hidden" id="editIndex" value="-1">
+        <input type="hidden" id="idUnico" value="">
+
+        <div class="section" style="background: #fff3cd;">
+            <div class="section-title">Control de Estado</div>
+            <div class="form-group">
+                <select id="estado" style="font-weight: bold; border: 2px solid var(--secondary);">
+                    <option value="PENDIENTE">⏳ PENDIENTE</option>
+                    <option value="AUTORIZADO">✅ AUTORIZADO</option>
+                    <option value="BAJA">❌ BAJA</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Datos del Agente</div>
+            <div class="form-group"><label>APELLIDO Y NOMBRE</label><input type="text" id="nombre" required></div>
+            <div class="row">
+                <div class="form-group"><label>DNI</label><input type="number" id="dni" required></div>
+                <div class="form-group">
+                    <label>NIVEL</label>
+                    <select id="nivel">
+                        <option>A1</option><option>A2</option><option>A3</option><option>B1</option><option>B</option><option>C</option><option>D</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group" style="flex:2;"><label>FUNCIÓN</label><input type="text" id="funcion" required></div>
+                <div class="form-group" style="flex:1;">
+                    <label>AGRUPAMIENTO</label>
+                    <select id="agrupamiento">
+                        <option value="ASISTENCIAL">ASIST.</option>
+                        <option value="NO ASISTENCIAL">NO ASIST.</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Organismo y Control Temporal</div>
+            <div class="form-group">
+                <label>ORGANISMO (EFECTOR)</label>
+                <select id="organismo" required>
+                    <option value="">Seleccione...</option>
+                    <option>APO</option>
+                    <option>AO VALLES CALCHAQUIES</option><option>TAFI DEL VALLE</option>
+                    <option>TAFI VIEJO</option><option>CADILLAL</option>
+                    <option>TRANCAS</option><option>ALTA MONTAÑA</option>
+                    <option>FAMAILLA</option><option>SAN PABLO</option><option>LULES</option>
+                </select>
+            </div>
+            <div class="row">
+                <div class="form-group"><label>DESDE</label><input type="date" id="desde"></div>
+                <div class="form-group"><label>HASTA</label><input type="date" id="hasta"></div>
+            </div>
+            <div class="row">
+                <div class="form-group"><label>PRES. DEPTO</label><input type="date" id="pres_oficina"></div>
+                <div class="form-group"><label>PRES. RRHH</label><input type="date" id="pres_rrhh"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Observaciones</div>
+            <textarea id="observacion" placeholder="Expediente, motivos, etc..."></textarea>
+        </div>
+
+        <button type="submit" id="btnGuardar" class="btn-save">Registrar Cobertura</button>
+        <button type="button" id="btnActualizar" class="btn-save btn-update" onclick="finalizarEdicion()">Confirmar Edición</button>
+        <button type="button" id="btnCancelar" class="btn-save" style="background:#666; display:none; margin-top:5px;" onclick="cancelarEdicion()">Cancelar</button>
+    </form>
+</div>
+
+<div class="main-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2 style="color:var(--primary); margin:0;">Registro de Cobertura Provisoria - APO</h2>
+        <button onclick="exportarCSV()" style="background:#1f7244; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; font-weight:bold;">📥 Descargar Planilla con Análisis</button>
+    </div>
+
+    <div class="search-container">
+        <strong style="color:var(--primary);">🔍 BUSCAR POR DNI:</strong>
+        <input type="number" id="inputBusqueda" class="search-input" placeholder="Ver historial del agente..." oninput="filtrarTabla()">
+    </div>
+
+    <div class="table-container">
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th>ACCIONES</th><th>ESTADO</th><th>ORGANISMO</th><th>DNI / AGENTE</th><th>FUNCIÓN / AGRUP.</th><th>VIGENCIA</th><th>PRES. DEPTO/RRHH</th><th>OBSERVACIÓN</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let baseDatos = JSON.parse(localStorage.getItem('db_cobertura_v5')) || [];
+    render(baseDatos);
+
+    function filtrarTabla() {
+        const busqueda = document.getElementById('inputBusqueda').value;
+        if (busqueda === "") { render(baseDatos); } 
+        else { render(baseDatos.filter(a => a.dni.includes(busqueda))); }
+    }
+
+    document.getElementById('coberturaForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let registro = obtenerDatosForm();
+        registro.id = Date.now();
+        baseDatos.push(registro);
+        guardarYRefrescar();
+        this.reset();
+    });
+
+    function obtenerDatosForm() {
+        return {
+            id: document.getElementById('idUnico').value || Date.now(),
+            estado: document.getElementById('estado').value,
+            nombre: document.getElementById('nombre').value.toUpperCase(),
+            dni: document.getElementById('dni').value,
+            nivel: document.getElementById('nivel').value,
+            funcion: document.getElementById('funcion').value.toUpperCase(),
+            agrupamiento: document.getElementById('agrupamiento').value,
+            organismo: document.getElementById('organismo').value,
+            desde: document.getElementById('desde').value || '---',
+            hasta: document.getElementById('hasta').value || '---',
+            pres_oficina: document.getElementById('pres_oficina').value || '---',
+            pres_rrhh: document.getElementById('pres_rrhh').value || '---',
+            observacion: document.getElementById('observacion').value.toUpperCase() || 'SIN OBSERVACIONES'
+        };
+    }
+
+    function render(datos) {
+        const t = document.getElementById('cuerpoTabla');
+        t.innerHTML = "";
+        const datosOrdenados = [...datos].reverse();
+
+        datosOrdenados.forEach((r) => {
+            const indexOrig = baseDatos.findIndex(x => x.id == r.id);
+            let clase = r.estado === "AUTORIZADO" ? "status-autorizado" : (r.estado === "BAJA" ? "status-baja" : "");
+
+            t.innerHTML += `<tr class="${clase}">
+                <td>
+                    <button class="btn-edit" onclick="prepararEdicion(${indexOrig})">EDITAR</button>
+                    <button class="btn-delete" onclick="eliminar(${indexOrig})">🗑️</button>
+                </td>
+                <td><b>${r.estado}</b></td>
+                <td>${r.organismo}</td>
+                <td>${r.dni}<br><b>${r.nombre}</b></td>
+                <td>${r.funcion}<br><small>${r.agrupamiento}</small></td>
+                <td>${r.desde}<br>${r.hasta}</td>
+                <td>D:${r.pres_oficina}<br>R:${r.pres_rrhh}</td>
+                <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">${r.observacion}</td>
+            </tr>`;
+        });
+    }
+
+    function prepararEdicion(index) {
+        const r = baseDatos[index];
+        document.getElementById('editIndex').value = index;
+        document.getElementById('idUnico').value = r.id;
+        document.getElementById('estado').value = r.estado;
+        document.getElementById('nombre').value = r.nombre;
+        document.getElementById('dni').value = r.dni;
+        document.getElementById('nivel').value = r.nivel;
+        document.getElementById('funcion').value = r.funcion;
+        document.getElementById('agrupamiento').value = r.agrupamiento;
+        document.getElementById('organismo').value = r.organismo;
+        document.getElementById('desde').value = r.desde === '---' ? '' : r.desde;
+        document.getElementById('hasta').value = r.hasta === '---' ? '' : r.hasta;
+        document.getElementById('pres_oficina').value = r.pres_oficina === '---' ? '' : r.pres_oficina;
+        document.getElementById('pres_rrhh').value = r.pres_rrhh === '---' ? '' : r.pres_rrhh;
+        document.getElementById('observacion').value = r.observacion === 'SIN OBSERVACIONES' ? '' : r.observacion;
+
+        document.getElementById('btnGuardar').style.display = 'none';
+        document.getElementById('btnActualizar').style.display = 'block';
+        document.getElementById('btnCancelar').style.display = 'block';
+    }
+
+    function finalizarEdicion() {
+        const index = document.getElementById('editIndex').value;
+        baseDatos[index] = obtenerDatosForm();
+        guardarYRefrescar();
+        cancelarEdicion();
+    }
+
+    function cancelarEdicion() {
+        document.getElementById('coberturaForm').reset();
+        document.getElementById('editIndex').value = "-1";
+        document.getElementById('idUnico').value = "";
+        document.getElementById('btnGuardar').style.display = 'block';
+        document.getElementById('btnActualizar').style.display = 'none';
+        document.getElementById('btnCancelar').style.display = 'none';
+    }
+
+    function eliminar(index) {
+        if(confirm("¿Eliminar este registro de cobertura?")) {
+            baseDatos.splice(index, 1);
+            guardarYRefrescar();
+        }
+    }
+
+    function guardarYRefrescar() {
+        localStorage.setItem('db_cobertura_v5', JSON.stringify(baseDatos));
+        render(baseDatos);
+    }
+
+    function exportarCSV() {
+        let csv = "\uFEFF--- REPORTE COBERTURAS APO ---\n";
+        csv += "ESTADO;ORGANISMO;AGENTE;DNI;NIVEL;FUNCION;AGRUPAMIENTO;DESDE;HASTA;PRES_DEPTO;PRES_RRHH;OBSERVACION\n";
+        
+        let stats = { aut: 0, pend: 0, baja: 0, asist: 0, noAsist: 0 };
+
+        baseDatos.forEach(r => {
+            csv += `${r.estado};${r.organismo};${r.nombre};${r.dni};${r.nivel};${r.funcion};${r.agrupamiento};${r.desde};${r.hasta};${r.pres_oficina};${r.pres_rrhh};${r.observacion}\n`;
+            if(r.estado === "AUTORIZADO") stats.aut++;
+            if(r.estado === "PENDIENTE") stats.pend++;
+            if(r.estado === "BAJA") stats.baja++;
+            if(r.agrupamiento === "ASISTENCIAL") stats.asist++;
+            if(r.agrupamiento === "NO ASISTENCIAL") stats.noAsist++;
+        });
+
+        csv += "\n\n--- ANALISIS ESTADISTICO ---\n";
+        csv += `TOTAL REGISTROS;${baseDatos.length}\n`;
+        csv += `AUTORIZADOS;${stats.aut}\n`;
+        csv += `PENDIENTES;${stats.pend}\n`;
+        csv += `BAJAS;${stats.baja}\n`;
+        csv += `PERSONAL ASISTENCIAL;${stats.asist}\n`;
+        csv += `PERSONAL NO ASISTENCIAL;${stats.noAsist}\n`;
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `COBERTURAS_APO_V5_${new Date().toLocaleDateString()}.csv`);
+        link.click();
+    }
+</script>
+</body>
+</html>

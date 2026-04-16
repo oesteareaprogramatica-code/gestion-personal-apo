@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoría RRHH APO - V17 (Estadísticas)</title>
+    <style>
+        :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; --warning: #ffc107; --danger: #dc3545; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 450px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
+        .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 10px; border-radius: 4px; }
+        
+        .section { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
+        .section-title { font-size: 0.7rem; font-weight: bold; color: var(--secondary); margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #ddd; }
+        
+        .form-group { margin-bottom: 8px; }
+        label { display: block; font-size: 0.65rem; font-weight: bold; margin-bottom: 2px; color: #444; }
+        input, select, textarea { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; }
+        
+        .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
+        .btn-update { background: var(--warning); color: black; display: none; }
+        .btn-edit { background: var(--warning); border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.65rem; font-weight: bold; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.65rem; margin-left: 5px; }
+        
+        .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; }
+        .search-container { background: #e1e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-left: 5px solid var(--primary); }
+        .search-input { flex-grow: 1; padding: 10px; border: 2px solid var(--primary); border-radius: 4px; font-size: 1rem; font-weight: bold; }
+        
+        .table-container { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: auto; flex-grow: 1; border: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.68rem; }
+        th { background: var(--primary); color: white; position: sticky; top: 0; padding: 10px; text-align: left; z-index: 10; white-space: nowrap; }
+        td { padding: 8px; border-bottom: 1px solid #eee; white-space: nowrap; }
+        
+        .estado-autorizado { background-color: #d4edda !important; color: #155724; }
+        .estado-no-autorizado { background-color: #f8d7da !important; color: #721c24; }
+        .tag-tramite { padding: 2px 5px; border-radius: 3px; font-weight: bold; font-size: 0.6rem; color: white; }
+        .tag-alta { background: #28a745; }
+        .tag-baja { background: #dc3545; }
+        .tag-continuidad { background: #007bff; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"><h2>AUDITORÍA RRHH - V17</h2></div>
+    
+    <form id="registroForm">
+        <input type="hidden" id="editIndex" value="-1">
+        <input type="hidden" id="idUnico" value="">
+
+        <div class="section" style="background: #fff3cd;">
+            <div class="section-title">Estado y Movimiento</div>
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group" style="flex:1;">
+                    <label>TRAMITE</label>
+                    <select id="tipo_tramite" style="font-weight: bold;">
+                        <option value="ALTA">🟢 ALTA</option>
+                        <option value="BAJA">🔴 BAJA</option>
+                        <option value="CONTINUIDAD">🔵 CONTINUIDAD</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>ESTADO</label>
+                    <select id="estado">
+                        <option value="PENDIENTE">⏳ PENDIENTE</option>
+                        <option value="AUTORIZADO">✅ AUTORIZADO</option>
+                        <option value="NO AUTORIZADO">❌ NO AUTORIZADO</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" style="background: #e3f2fd; border-left: 4px solid var(--secondary);">
+            <div class="section-title">Presentación en Oficinas</div>
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group" style="flex:1;"><label>EN DEPARTAMENTO</label><input type="date" id="f_depto"></div>
+                <div class="form-group" style="flex:1;"><label>EN RRHH</label><input type="date" id="f_rrhh"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Datos del Agente</div>
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group" style="flex:1;"><label>DNI</label><input type="number" id="dni" required></div>
+                <div class="form-group" style="flex:1;">
+                    <label>NIVEL</label>
+                    <select id="nivel"><option>A1</option><option>A2</option><option>A3</option><option>B1</option><option>B</option><option>C</option><option>D</option></select>
+                </div>
+            </div>
+            <div class="form-group"><label>APELLIDO Y NOMBRE</label><input type="text" id="nombre" required></div>
+            
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group" style="flex:1.5;"><label>FUNCIÓN</label><input type="text" id="funcion" placeholder="Ej: ENFERMERO/A"></div>
+                <div class="form-group" style="flex:1;">
+                    <label>AGRUPAMIENTO</label>
+                    <select id="agrupamiento">
+                        <option value="ASISTENCIAL">ASISTENCIAL</option>
+                        <option value="NO ASISTENCIAL">NO ASISTENCIAL</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>EFECTOR</label>
+                <select id="efector" required>
+                    <option value="">Seleccione...</option>
+                    <option>APO</option>
+                    <option>AO VALLES CALCHAQUIES</option><option>TAFI DEL VALLE</option><option>TAFI VIEJO</option><option>CADILLAL</option>
+                    <option>TRANCAS</option><option>ALTA MONTAÑA</option><option>FAMAILLA</option><option>SAN PABLO</option><option>LULES</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section" style="border-left: 4px solid var(--accent);">
+            <div class="section-title" style="color:var(--primary)">Datos Presupuestarios</div>
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group" style="flex:1;"><label>CÓDIGO DE LIBRE</label><input type="text" id="cod_libre" placeholder="---"></div>
+                <div class="form-group" style="flex:1;"><label>MONTO ($)</label><input type="number" id="monto" step="0.01" placeholder="0.00"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Vigencia y Observaciones</div>
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group" style="flex:1;"><label>DESDE</label><input type="date" id="desde"></div>
+                <div class="form-group" style="flex:1;"><label>HASTA</label><input type="date" id="hasta"></div>
+            </div>
+            <textarea id="observacion" placeholder="Expediente, reemplazo de..."></textarea>
+        </div>
+
+        <button type="submit" id="btnGuardar" class="btn-save">Registrar Movimiento</button>
+        <button type="button" id="btnActualizar" class="btn-save btn-update" onclick="finalizarEdicion()">Confirmar Modificación</button>
+        <button type="button" id="btnCancelar" class="btn-save" style="background:#666; display:none; margin-top:5px;" onclick="cancelarEdicion()">Cancelar</button>
+    </form>
+</div>
+
+<div class="main-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2 style="color:var(--primary); margin:0;">Control de Auditoría RRHH - APO</h2>
+        <button onclick="exportarCSV()" style="background:#1f7244; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; font-weight:bold;">📥 Descargar Excel con Análisis</button>
+    </div>
+
+    <div class="search-container">
+        <strong style="color:var(--primary);">🔍 FILTRAR POR DNI:</strong>
+        <input type="number" id="inputBusqueda" class="search-input" placeholder="Buscar historial..." oninput="filtrarTabla()">
+    </div>
+
+    <div class="table-container">
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th>ACCIONES</th><th>TIPO</th><th>ESTADO</th><th>PRES. DEPTO/RRHH</th><th>DNI/AGENTE</th><th>FUNCIÓN/AGRUP.</th><th>CÓD. LIBRE</th><th>MONTO</th><th>VIGENCIA</th><th>OBSERVACIÓN</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let baseDatos = JSON.parse(localStorage.getItem('db_apo_v17')) || [];
+    render(baseDatos);
+
+    function filtrarTabla() {
+        const busqueda = document.getElementById('inputBusqueda').value;
+        if (busqueda === "") { render(baseDatos); } 
+        else { render(baseDatos.filter(a => a.dni.includes(busqueda))); }
+    }
+
+    document.getElementById('registroForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let nuevoRegistro = obtenerDatosForm();
+        nuevoRegistro.id = Date.now();
+        baseDatos.push(nuevoRegistro);
+        guardarYRefrescar();
+        this.reset();
+    });
+
+    function obtenerDatosForm() {
+        return {
+            id: document.getElementById('idUnico').value || Date.now(),
+            tipo_tramite: document.getElementById('tipo_tramite').value,
+            estado: document.getElementById('estado').value,
+            f_depto: document.getElementById('f_depto').value || '---',
+            f_rrhh: document.getElementById('f_rrhh').value || '---',
+            dni: document.getElementById('dni').value,
+            nombre: document.getElementById('nombre').value.toUpperCase(),
+            funcion: document.getElementById('funcion').value.toUpperCase() || 'S/F',
+            agrupamiento: document.getElementById('agrupamiento').value,
+            efector: document.getElementById('efector').value,
+            nivel: document.getElementById('nivel').value,
+            cod_libre: document.getElementById('cod_libre').value.toUpperCase() || '---',
+            monto: document.getElementById('monto').value || '0.00',
+            desde: document.getElementById('desde').value || 'S/D',
+            hasta: document.getElementById('hasta').value || 'S/D',
+            observacion: document.getElementById('observacion').value.toUpperCase() || 'SIN OBSERVACIONES'
+        };
+    }
+
+    function render(datos) {
+        const t = document.getElementById('cuerpoTabla');
+        t.innerHTML = "";
+        const datosOrdenados = [...datos].reverse();
+
+        datosOrdenados.forEach((r) => {
+            const indexOrig = baseDatos.findIndex(x => x.id == r.id);
+            let claseEstado = r.estado === "AUTORIZADO" ? "estado-autorizado" : (r.estado === "NO AUTORIZADO" ? "estado-no-autorizado" : "");
+            let claseTipo = r.tipo_tramite === "ALTA" ? "tag-alta" : (r.tipo_tramite === "BAJA" ? "tag-baja" : "tag-continuidad");
+
+            t.innerHTML += `<tr class="${claseEstado}">
+                <td>
+                    <button class="btn-edit" onclick="prepararEdicion(${indexOrig})">EDITAR</button>
+                    <button class="btn-delete" onclick="eliminar(${indexOrig})">🗑️</button>
+                </td>
+                <td><span class="tag-tramite ${claseTipo}">${r.tipo_tramite}</span></td>
+                <td><b>${r.estado}</b></td>
+                <td>D:${r.f_depto}<br>R:${r.f_rrhh}</td>
+                <td>${r.dni}<br><b>${r.nombre}</b></td>
+                <td>${r.funcion}<br><small>${r.agrupamiento}</small></td>
+                <td style="font-weight:bold; color:var(--primary)">${r.cod_libre}</td>
+                <td>$${parseFloat(r.monto).toLocaleString()}</td>
+                <td>${r.desde}<br>${r.hasta}</td>
+                <td><small>${r.observacion}</small></td>
+            </tr>`;
+        });
+    }
+
+    function eliminar(index) {
+        if(confirm("¿Eliminar este registro específico?")) {
+            baseDatos.splice(index, 1);
+            guardarYRefrescar();
+        }
+    }
+
+    function prepararEdicion(index) {
+        const r = baseDatos[index];
+        document.getElementById('editIndex').value = index;
+        document.getElementById('idUnico').value = r.id;
+        document.getElementById('tipo_tramite').value = r.tipo_tramite;
+        document.getElementById('estado').value = r.estado;
+        document.getElementById('f_depto').value = r.f_depto === '---' ? '' : r.f_depto;
+        document.getElementById('f_rrhh').value = r.f_rrhh === '---' ? '' : r.f_rrhh;
+        document.getElementById('dni').value = r.dni;
+        document.getElementById('nombre').value = r.nombre;
+        document.getElementById('funcion').value = r.funcion === 'S/F' ? '' : r.funcion;
+        document.getElementById('agrupamiento').value = r.agrupamiento;
+        document.getElementById('efector').value = r.efector;
+        document.getElementById('nivel').value = r.nivel;
+        document.getElementById('cod_libre').value = r.cod_libre === '---' ? '' : r.cod_libre;
+        document.getElementById('monto').value = r.monto === '0.00' ? '' : r.monto;
+        document.getElementById('desde').value = r.desde === 'S/D' ? '' : r.desde;
+        document.getElementById('hasta').value = r.hasta === 'S/D' ? '' : r.hasta;
+        document.getElementById('observacion').value = r.observacion === 'SIN OBSERVACIONES' ? '' : r.observacion;
+
+        document.getElementById('btnGuardar').style.display = 'none';
+        document.getElementById('btnActualizar').style.display = 'block';
+        document.getElementById('btnCancelar').style.display = 'block';
+    }
+
+    function finalizarEdicion() {
+        const index = document.getElementById('editIndex').value;
+        baseDatos[index] = obtenerDatosForm();
+        guardarYRefrescar();
+        cancelarEdicion();
+    }
+
+    function cancelarEdicion() {
+        document.getElementById('registroForm').reset();
+        document.getElementById('editIndex').value = "-1";
+        document.getElementById('idUnico').value = "";
+        document.getElementById('btnGuardar').style.display = 'block';
+        document.getElementById('btnActualizar').style.display = 'none';
+        document.getElementById('btnCancelar').style.display = 'none';
+    }
+
+    function guardarYRefrescar() {
+        localStorage.setItem('db_apo_v17', JSON.stringify(baseDatos));
+        render(baseDatos);
+    }
+
+    function exportarCSV() {
+        let csv = "\uFEFF--- REPORTE DE AUDITORIA RRHH APO ---\n";
+        csv += "TRAMITE;ESTADO;F_DEPTO;F_RRHH;DNI;AGENTE;FUNCION;AGRUPAMIENTO;EFECTOR;CÓD_LIBRE;MONTO;DESDE;HASTA;OBSERVACION\n";
+        
+        let totalInversion = 0;
+        let stats = {
+            alta: 0, baja: 0, cont: 0,
+            autorizado: 0, pendiente: 0, no_aut: 0,
+            asistencial: 0, no_asistencial: 0
+        };
+
+        baseDatos.forEach(r => { 
+            csv += `${r.tipo_tramite};${r.estado};${r.f_depto};${r.f_rrhh};${r.dni};${r.nombre};${r.funcion};${r.agrupamiento};${r.efector};${r.cod_libre};${r.monto};${r.desde};${r.hasta};${r.observacion}\n`; 
+            
+            totalInversion += parseFloat(r.monto || 0);
+            if(r.tipo_tramite === "ALTA") stats.alta++;
+            if(r.tipo_tramite === "BAJA") stats.baja++;
+            if(r.tipo_tramite === "CONTINUIDAD") stats.cont++;
+            
+            if(r.estado === "AUTORIZADO") stats.autorizado++;
+            if(r.estado === "PENDIENTE") stats.pendiente++;
+            if(r.estado === "NO AUTORIZADO") stats.no_aut++;
+
+            if(r.agrupamiento === "ASISTENCIAL") stats.asistencial++;
+            if(r.agrupamiento === "NO ASISTENCIAL") stats.no_asistencial++;
+        });
+
+        csv += "\n\n--- ANALISIS ESTADISTICO ---\n";
+        csv += `TOTAL DE TRAMITES;${baseDatos.length}\n`;
+        csv += `INVERSION TOTAL; $${totalInversion.toLocaleString()}\n\n`;
+        
+        csv += "DISTRIBUCION POR TIPO\n";
+        csv += `ALTAS;${stats.alta}\n`;
+        csv += `BAJAS;${stats.baja}\n`;
+        csv += `CONTINUIDADES;${stats.cont}\n\n`;
+
+        csv += "CONTROL DE ESTADOS\n";
+        csv += `AUTORIZADOS;${stats.autorizado}\n`;
+        csv += `PENDIENTES;${stats.pendiente}\n`;
+        csv += `NO AUTORIZADOS;${stats.no_aut}\n\n`;
+
+        csv += "AGRUPAMIENTO\n";
+        csv += `ASISTENCIAL;${stats.asistencial}\n`;
+        csv += `NO ASISTENCIAL;${stats.no_asistencial}\n`;
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `REPORTE_ESTADISTICO_APO_${new Date().toLocaleDateString()}.csv`);
+        link.click();
+    }
+</script>
+</body>
+</html>
