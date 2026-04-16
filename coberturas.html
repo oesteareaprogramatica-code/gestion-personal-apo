@@ -3,136 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Coberturas - APO</title>
+    <title>Gestión de Coberturas - APO</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 20px; background-color: #f4f7f9; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h2 { color: #003366; border-bottom: 2px solid #00b1b2; padding-bottom: 10px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background: #003366; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #00509d; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #00b1b2; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .solo-lectura-aviso { background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f5; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h2 { color: #003366; border-bottom: 3px solid #00b1b2; padding-bottom: 10px; margin-top: 0; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-weight: 600; margin-bottom: 5px; color: #444; }
+        input, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        .full-width { grid-column: span 2; }
+        .buttons { margin-top: 10px; display: flex; gap: 10px; }
+        button { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-save { background-color: #003366; color: white; }
+        .btn-save:hover { background-color: #00509d; }
+        .btn-excel { background-color: #28a745; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 14px; }
+        th { background-color: #00b1b2; color: white; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; }
+        tr:hover { background-color: #f1f1f1; }
+        .footer { margin-top: 30px; font-size: 12px; color: #777; text-align: center; border-top: 1px solid #eee; padding-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Registro de Coberturas - Área Programática Oeste</h2>
+    <h2>Registro de Cobertura de Cargos (F1, F2, F23)</h2>
     
-    <div id="avisoLectura" class="solo-lectura-aviso">
-        <strong>Modo Lector:</strong> Puedes ver los registros actualizados, pero no tienes permisos para cargar nuevos datos.
-    </div>
-
-    <div id="formularioCarga">
+    <div class="form-grid">
         <div class="form-group">
             <label>Nombre del Agente:</label>
-            <input type="text" id="nombre">
+            <input type="text" id="nombre" placeholder="Apellido y Nombre">
         </div>
         <div class="form-group">
             <label>DNI:</label>
             <input type="text" id="dni">
         </div>
         <div class="form-group">
-            <label>Función/Cargo:</label>
-            <input type="text" id="funcion">
+            <label>Función / Cargo:</label>
+            <input type="text" id="cargo">
         </div>
         <div class="form-group">
-            <label>Vigencia Desde:</label>
-            <input type="date" id="desde">
+            <label>Vigencia (Desde - Hasta):</label>
+            <input type="text" id="vigencia" placeholder="ej: 01/04 al 15/04">
         </div>
-        <div class="form-group">
-            <label>Vigencia Hasta:</label>
-            <input type="date" id="hasta">
+        <div class="form-group full-width">
+            <label>Observaciones (Reemplazo de..., Motivo):</label>
+            <textarea id="obs" rows="2"></textarea>
         </div>
-        <div class="form-group">
-            <label>Observaciones:</label>
-            <textarea id="observaciones"></textarea>
-        </div>
-        <button onclick="guardarDatos()">Registrar Cobertura</button>
     </div>
 
-    <h3>Registros Actuales</h3>
-    <table id="tablaDatos">
+    <div class="buttons">
+        <button class="btn-save" onclick="agregarFila()">Registrar y Guardar</button>
+        <button class="btn-excel" onclick="exportarExcel()">Descargar Excel para Compartir</button>
+    </div>
+
+    <table id="tablaCoberturas">
         <thead>
             <tr>
-                <th>Fecha Carga</th>
+                <th>Fecha</th>
                 <th>Nombre</th>
                 <th>DNI</th>
-                <th>Función</th>
-                <th>Desde</th>
-                <th>Hasta</th>
+                <th>Cargo</th>
+                <th>Vigencia</th>
                 <th>Observaciones</th>
             </tr>
         </thead>
-        <tbody>
-            </tbody>
+        <tbody id="cuerpoTabla"></tbody>
     </table>
+
+    <div class="footer">
+        Área Programática Oeste - SIPROSA Tucumán | Gestión de Personal
+    </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwez-u0nipDvEdtkU3h25UipiJ6YYMya_O_ZUKJtt3ovgtOfaBG0tGUi5Q-vAr4rNyI1w/exec";
+    // Cargar datos guardados al abrir
+    window.onload = function() {
+        const guardados = JSON.parse(localStorage.getItem('datosCobertura') || '[]');
+        guardados.forEach(dato => insertarEnTabla(dato));
+    };
 
-    // Función para guardar
-    function guardarDatos() {
-        const btn = event.target;
-        btn.disabled = true;
-        btn.innerText = "Guardando...";
-
-        const datos = {
+    function agregarFila() {
+        const dato = {
+            fecha: new Date().toLocaleDateString(),
             nombre: document.getElementById('nombre').value,
             dni: document.getElementById('dni').value,
-            funcion: document.getElementById('funcion').value,
-            desde: document.getElementById('desde').value,
-            hasta: document.getElementById('hasta').value,
-            observaciones: document.getElementById('observaciones').value
+            cargo: document.getElementById('cargo').value,
+            vigencia: document.getElementById('vigencia').value,
+            obs: document.getElementById('obs').value
         };
 
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify(datos)
-        }).then(() => {
-            alert("¡Datos guardados con éxito!");
-            location.reload(); // Recarga para ver la nueva fila
-        }).catch(err => {
-            alert("Error al guardar");
-            btn.disabled = false;
-            btn.innerText = "Registrar Cobertura";
-        });
+        if(!dato.nombre) return alert("Por favor, pon un nombre");
+
+        // Guardar en la "memoria" del navegador
+        const guardados = JSON.parse(localStorage.getItem('datosCobertura') || '[]');
+        guardados.push(dato);
+        localStorage.setItem('datosCobertura', JSON.stringify(guardados));
+
+        insertarEnTabla(dato);
+        
+        // Limpiar campos
+        document.querySelectorAll('input, textarea').forEach(i => i.value = '');
     }
 
-    // Función para leer y mostrar los datos de Google Sheets
-    function cargarTabla() {
-        fetch(SCRIPT_URL)
-        .then(res => res.json())
-        .then(data => {
-            const tbody = document.querySelector('#tablaDatos tbody');
-            tbody.innerHTML = "";
-            // Empezamos desde i=1 para saltar el encabezado de la planilla
-            for(let i = 1; i < data.length; i++) {
-                let fila = `<tr>
-                    <td>${new Date(data[i][0]).toLocaleDateString()}</td>
-                    <td>${data[i][1]}</td>
-                    <td>${data[i][2]}</td>
-                    <td>${data[i][3]}</td>
-                    <td>${data[i][4] ? new Date(data[i][4]).toLocaleDateString() : ''}</td>
-                    <td>${data[i][5] ? new Date(data[i][5]).toLocaleDateString() : ''}</td>
-                    <td>${data[i][6]}</td>
-                </tr>`;
-                tbody.innerHTML += fila;
-            }
-        });
+    function insertarEnTabla(dato) {
+        const tabla = document.getElementById('cuerpoTabla');
+        const fila = tabla.insertRow(0);
+        fila.innerHTML = `<td>${dato.fecha}</td><td>${dato.nombre}</td><td>${dato.dni}</td><td>${dato.cargo}</td><td>${dato.vigencia}</td><td>${dato.obs}</td>`;
     }
 
-    // Cargar los datos al abrir la página
-    window.onload = cargarTabla;
+    function exportarExcel() {
+        const tabla = document.getElementById("tablaCoberturas");
+        const wb = XLSX.utils.table_to_book(tabla, {sheet: "Coberturas"});
+        XLSX.writeFile(wb, "Reporte_Coberturas_APO.xlsx");
+    }
 </script>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
 </body>
 </html>
