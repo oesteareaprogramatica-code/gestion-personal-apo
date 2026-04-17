@@ -3,160 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Coberturas - APO</title>
+    <title>Cobertura de Servicio APO - V5</title>
     <style>
-        :root { --primary: #003366; --accent: #00b1b2; --bg: #f0f4f7; }
+        :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); margin: 0; padding: 0; }
+        body { background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* Barra Azul Superior Fina */
-        .nav-header { background: var(--primary); color: white; padding: 12px 30px; display: flex; justify-content: space-between; font-size: 14px; }
-
-        /* Tarjeta Blanca Centrada (Diseño Original) */
-        .main-card { 
-            max-width: 900px; 
-            margin: 50px auto; 
-            background: white; 
-            padding: 40px; 
-            border-radius: 8px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-        }
+        /* Panel Lateral de Carga */
+        .sidebar { width: 400px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
+        .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 15px; border-radius: 4px; text-transform: uppercase; }
         
-        h2 { color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 15px; margin-top: 0; font-size: 22px; }
+        .section { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
+        .section-title { font-size: 0.75rem; font-weight: bold; color: var(--secondary); margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+        
+        .form-group { margin-bottom: 10px; }
+        .row { display: flex; gap: 8px; }
+        .row > .form-group { flex: 1; }
+        
+        label { display: block; font-size: 0.7rem; font-weight: bold; margin-bottom: 4px; color: #555; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; outline: none; }
+        input:focus { border-color: var(--secondary); }
 
-        /* Formulario Estilo Original */
-        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 25px; }
-        .form-group { display: flex; flex-direction: column; }
-        .full-width { grid-column: span 3; }
+        .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
+        .btn-submit:hover { background: #002244; }
 
-        label { font-weight: bold; margin-bottom: 8px; color: #333; font-size: 14px; }
-        input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; background: #fafafa; }
-        input:focus { border-color: var(--accent); outline: none; background: white; }
+        /* Área de la Tabla (Derecha) */
+        .main-content { flex-grow: 1; padding: 25px; display: flex; flex-direction: column; background: #fdfdfd; }
+        .header-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .search-container { background: #eef2f7; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #d1d9e4; }
+        .search-input { flex-grow: 1; padding: 10px; border: 2px solid #003366; border-radius: 4px; font-size: 1rem; }
 
-        /* Botones Originales */
-        .btn-container { display: flex; gap: 15px; margin: 30px 0; }
-        button { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.3s; }
-        .btn-blue { background-color: var(--primary); color: white; }
-        .btn-green { background-color: #28a745; color: white; }
-        button:hover { opacity: 0.9; }
+        .table-container { background: white; border-radius: 4px; overflow: auto; flex-grow: 1; border: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        th { background: var(--primary); color: white; position: sticky; top: 0; padding: 12px; text-align: left; z-index: 10; text-transform: uppercase; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
 
-        /* Tabla Original */
-        .table-area { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { background-color: var(--accent); color: white; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #eee; color: #444; }
-
-        .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #aaa; border-top: 1px solid #eee; padding-top: 20px; }
+        .btn-download { background: #1f7244; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<div class="nav-header">
-    <strong>APO - Gestión de Personal</strong>
-    <span>SIPROSA - Tucumán</span>
+<div class="sidebar">
+    <div class="sidebar-header"><strong>COBERTURAS APO - V5</strong></div>
+    
+    <form id="formCarga">
+        <div class="section" style="background: #fff9e6; border: 1px solid #ffeeba;">
+            <div class="section-title">Control de Estado</div>
+            <div class="form-group">
+                <select id="estado" style="font-weight: bold; color: #856404;">
+                    <option value="PENDIENTE">⏳ PENDIENTE</option>
+                    <option value="AUTORIZADO">✅ AUTORIZADO</option>
+                    <option value="BAJA">❌ BAJA</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Datos del Agente</div>
+            <div class="form-group"><label>Apellido y Nombre</label><input type="text" id="nombre" required></div>
+            <div class="row">
+                <div class="form-group"><label>DNI</label><input type="number" id="dni" required></div>
+                <div class="form-group">
+                    <label>Nivel</label>
+                    <select id="nivel"><option>A1</option><option>A2</option><option>B1</option><option>C</option></select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group"><label>Función</label><input type="text" id="funcion" required></div>
+                <div class="form-group">
+                    <label>Agrupamiento</label>
+                    <select id="agrupamiento"><option>ASIST.</option><option>NO ASIST.</option></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Organismo y Control Temporal</div>
+            <div class="form-group">
+                <label>Organismo (Efector)</label>
+                <select id="organismo">
+                    <option value="">Seleccione...</option>
+                    <option>APO</option><option>TAFI VIEJO</option><option>FAMAILLA</option><option>LULES</option>
+                </select>
+            </div>
+            <div class="row">
+                <div class="form-group"><label>Desde</label><input type="date" id="desde"></div>
+                <div class="form-group"><label>Hasta</label><input type="date" id="hasta"></div>
+            </div>
+            <div class="row">
+                <div class="form-group"><label>Pres. Depto</label><input type="date" id="pres_depto"></div>
+                <div class="form-group"><label>Pres. RRHH</label><input type="date" id="pres_rrhh"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Observaciones</div>
+            <textarea id="obs" placeholder="Expediente, motivos, etc..." rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Registrar Cobertura</button>
+    </form>
 </div>
 
-<div class="main-card">
-    <h2>Registro de Cobertura de Cargos</h2>
-    
-    <form id="regForm">
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Nombre del Agente:</label>
-                <input type="text" id="nombre" placeholder="Apellido y Nombre" required>
-            </div>
-            <div class="form-group">
-                <label>DNI:</label>
-                <input type="text" id="dni" required>
-            </div>
-            <div class="form-group">
-                <label>Función / Cargo:</label>
-                <input type="text" id="cargo" required>
-            </div>
-            <div class="form-group full-width">
-                <label>Vigencia:</label>
-                <input type="text" id="vigencia" placeholder="Desde - Hasta">
-            </div>
-            <div class="form-group full-width">
-                <label>Observaciones:</label>
-                <textarea id="obs" rows="3" placeholder="Motivo del reemplazo, titular, etc."></textarea>
-            </div>
-        </div>
+<div class="main-content">
+    <div class="header-main">
+        <h2 style="color:var(--primary); margin:0;">Registro de Cobertura Provisoria - APO</h2>
+        <button onclick="descargar()" class="btn-download">📊 Descargar Planilla con Análisis</button>
+    </div>
 
-        <div class="btn-container">
-            <button type="submit" class="btn-blue">Registrar en Tabla</button>
-            <button type="button" class="btn-green" onclick="descargarExcel()">Descargar Reporte Excel</button>
-        </div>
-    </form>
+    <div class="search-container">
+        <strong style="color:#003366; font-size: 0.8rem;">🔍 BUSCAR POR DNI:</strong>
+        <input type="number" id="buscador" class="search-input" placeholder="Ver historial del agente..." oninput="filtrar()">
+    </div>
 
-    <div class="table-area">
+    <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>Fecha Carga</th>
-                    <th>Agente</th>
-                    <th>DNI</th>
-                    <th>Cargo</th>
+                    <th>Estado</th>
+                    <th>Organismo</th>
+                    <th>DNI / Agente</th>
+                    <th>Función / Agrup.</th>
                     <th>Vigencia</th>
-                    <th>Observaciones</th>
+                    <th>Pres. Depto/RRHH</th>
+                    <th>Observación</th>
                 </tr>
             </thead>
-            <tbody id="tablaBody"></tbody>
+            <tbody id="cuerpo"></tbody>
         </table>
-    </div>
-
-    <div class="footer">
-        Área Programática Oeste | Hospitales y CAPS | Departamento de Personal
     </div>
 </div>
 
 <script>
-    let datos = JSON.parse(localStorage.getItem('apo_db_orig')) || [];
-    mostrarTabla();
+    let db = JSON.parse(localStorage.getItem('db_apo_v5_final')) || [];
+    render();
 
-    document.getElementById('regForm').addEventListener('submit', function(e) {
+    document.getElementById('formCarga').addEventListener('submit', function(e) {
         e.preventDefault();
-        const nuevo = {
-            fecha: new Date().toLocaleDateString(),
+        const registro = {
+            id: Date.now(),
+            estado: document.getElementById('estado').value,
             nombre: document.getElementById('nombre').value.toUpperCase(),
             dni: document.getElementById('dni').value,
-            cargo: document.getElementById('cargo').value.toUpperCase(),
-            vigencia: document.getElementById('vigencia').value,
-            obs: document.getElementById('obs').value.toUpperCase() || 'SIN OBSERVACIONES'
+            funcion: document.getElementById('funcion').value.toUpperCase(),
+            agrupamiento: document.getElementById('agrupamiento').value,
+            organismo: document.getElementById('organismo').value,
+            desde: document.getElementById('desde').value || '--',
+            hasta: document.getElementById('hasta').value || '--',
+            pDepto: document.getElementById('pres_depto').value || '--',
+            pRRHH: document.getElementById('pres_rrhh').value || '--',
+            obs: document.getElementById('obs').value.toUpperCase() || 'SIN OBS.'
         };
-        datos.push(nuevo);
-        localStorage.setItem('apo_db_orig', JSON.stringify(datos));
+        db.push(registro);
+        localStorage.setItem('db_apo_v5_final', JSON.stringify(db));
+        render();
         this.reset();
-        mostrarTabla();
     });
 
-    function mostrarTabla() {
-        const body = document.getElementById('tablaBody');
-        body.innerHTML = "";
-        [...datos].reverse().forEach(r => {
-            body.innerHTML += `<tr>
-                <td>${r.fecha}</td>
-                <td><b>${r.nombre}</b></td>
-                <td>${r.dni}</td>
-                <td>${r.cargo}</td>
-                <td>${r.vigencia}</td>
+    function render(data = db) {
+        const t = document.getElementById('cuerpo');
+        t.innerHTML = "";
+        [...data].reverse().forEach(r => {
+            t.innerHTML += `<tr>
+                <td><b>${r.estado}</b></td>
+                <td>${r.organismo}</td>
+                <td>${r.dni}<br><b>${r.nombre}</b></td>
+                <td>${r.funcion}<br><small>${r.agrupamiento}</small></td>
+                <td>${r.desde}<br>${r.hasta}</td>
+                <td>D:${r.pDepto}<br>R:${r.pRRHH}</td>
                 <td>${r.obs}</td>
             </tr>`;
         });
     }
 
-    function descargarExcel() {
-        let csv = "\uFEFFFECHA;AGENTE;DNI;CARGO;VIGENCIA;OBSERVACIONES\n";
-        datos.forEach(r => {
-            csv += `${r.fecha};${r.nombre};${r.dni};${r.cargo};${r.vigencia};${r.obs}\n`;
-        });
+    function filtrar() {
+        const val = document.getElementById('buscador').value;
+        render(db.filter(i => i.dni.includes(val)));
+    }
+
+    function descargar() {
+        let csv = "\uFEFFESTADO;ORGANISMO;AGENTE;DNI;FUNCION;DESDE;HASTA;OBS\n";
+        db.forEach(r => { csv += `${r.estado};${r.organismo};${r.nombre};${r.dni};${r.funcion};${r.desde};${r.hasta};${r.obs}\n`; });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "Reporte_Coberturas.csv";
+        link.download = "Coberturas_APO_V5.csv";
         link.click();
     }
 </script>
-
 </body>
 </html>
