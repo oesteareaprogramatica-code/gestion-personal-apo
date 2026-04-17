@@ -3,44 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cobertura de Servicio APO - V5</title>
+    <title>Coberturas APO - V5</title>
     <style>
         :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* Panel Lateral de Carga */
         .sidebar { width: 400px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
-        .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 15px; border-radius: 4px; text-transform: uppercase; }
+        .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 15px; border-radius: 4px; text-transform: uppercase; font-size: 0.9rem; }
         
         .section { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
         .section-title { font-size: 0.75rem; font-weight: bold; color: var(--secondary); margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
         
-        .form-group { margin-bottom: 10px; }
-        .row { display: flex; gap: 8px; }
-        .row > .form-group { flex: 1; }
-        
-        label { display: block; font-size: 0.7rem; font-weight: bold; margin-bottom: 4px; color: #555; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; outline: none; }
-        input:focus { border-color: var(--secondary); }
+        label { display: block; font-size: 0.7rem; font-weight: bold; margin-bottom: 4px; color: #555; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; outline: none; margin-bottom: 8px; }
 
-        .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
-        .btn-submit:hover { background: #002244; }
+        .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
 
-        /* Área de la Tabla (Derecha) */
-        .main-content { flex-grow: 1; padding: 25px; display: flex; flex-direction: column; background: #fdfdfd; }
-        .header-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        
+        .main-content { flex-grow: 1; padding: 25px; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
         .search-container { background: #eef2f7; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #d1d9e4; }
         .search-input { flex-grow: 1; padding: 10px; border: 2px solid #003366; border-radius: 4px; font-size: 1rem; }
 
-        .table-container { background: white; border-radius: 4px; overflow: auto; flex-grow: 1; border: 1px solid #ddd; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-        th { background: var(--primary); color: white; position: sticky; top: 0; padding: 12px; text-align: left; z-index: 10; text-transform: uppercase; }
+        .table-container { border: 1px solid #ddd; border-radius: 4px; overflow: auto; flex-grow: 1; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 800px; }
+        th { background: var(--primary); color: white; position: sticky; top: 0; padding: 12px; text-align: left; z-index: 10; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
         tr:nth-child(even) { background-color: #f9f9f9; }
-
-        .btn-download { background: #1f7244; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -49,58 +37,33 @@
     <div class="sidebar-header"><strong>COBERTURAS APO - V5</strong></div>
     
     <form id="formCarga">
-        <div class="section" style="background: #fff9e6; border: 1px solid #ffeeba;">
+        <div class="section" style="background: #fff9e6;">
             <div class="section-title">Control de Estado</div>
-            <div class="form-group">
-                <select id="estado" style="font-weight: bold; color: #856404;">
-                    <option value="PENDIENTE">⏳ PENDIENTE</option>
-                    <option value="AUTORIZADO">✅ AUTORIZADO</option>
-                    <option value="BAJA">❌ BAJA</option>
-                </select>
-            </div>
+            <select id="estado"><option>PENDIENTE</option><option>AUTORIZADO</option><option>BAJA</option></select>
         </div>
 
         <div class="section">
             <div class="section-title">Datos del Agente</div>
-            <div class="form-group"><label>Apellido y Nombre</label><input type="text" id="nombre" required></div>
-            <div class="row">
-                <div class="form-group"><label>DNI</label><input type="number" id="dni" required></div>
-                <div class="form-group">
-                    <label>Nivel</label>
-                    <select id="nivel"><option>A1</option><option>A2</option><option>B1</option><option>C</option></select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group"><label>Función</label><input type="text" id="funcion" required></div>
-                <div class="form-group">
-                    <label>Agrupamiento</label>
-                    <select id="agrupamiento"><option>ASIST.</option><option>NO ASIST.</option></select>
-                </div>
-            </div>
+            <label>Apellido y Nombre</label><input type="text" id="nombre" required>
+            <label>DNI</label><input type="number" id="dni" required>
+            <label>Función</label><input type="text" id="funcion" required>
         </div>
 
         <div class="section">
-            <div class="section-title">Organismo y Control Temporal</div>
-            <div class="form-group">
-                <label>Organismo (Efector)</label>
-                <select id="organismo">
-                    <option value="">Seleccione...</option>
-                    <option>APO</option><option>TAFI VIEJO</option><option>FAMAILLA</option><option>LULES</option>
-                </select>
-            </div>
-            <div class="row">
-                <div class="form-group"><label>Desde</label><input type="date" id="desde"></div>
-                <div class="form-group"><label>Hasta</label><input type="date" id="hasta"></div>
-            </div>
-            <div class="row">
-                <div class="form-group"><label>Pres. Depto</label><input type="date" id="pres_depto"></div>
-                <div class="form-group"><label>Pres. RRHH</label><input type="date" id="pres_rrhh"></div>
-            </div>
+            <div class="section-title">Organismo</div>
+            <select id="organismo">
+                <option>APO</option><option>TAFI VIEJO</option><option>LULES</option><option>FAMAILLA</option>
+            </select>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Vigencia</div>
+            <input type="text" id="vigencia" placeholder="Desde - Hasta">
         </div>
 
         <div class="section">
             <div class="section-title">Observaciones</div>
-            <textarea id="obs" placeholder="Expediente, motivos, etc..." rows="3"></textarea>
+            <textarea id="obs" rows="3"></textarea>
         </div>
 
         <button type="submit" class="btn-submit">Registrar Cobertura</button>
@@ -108,14 +71,9 @@
 </div>
 
 <div class="main-content">
-    <div class="header-main">
-        <h2 style="color:var(--primary); margin:0;">Registro de Cobertura Provisoria - APO</h2>
-        <button onclick="descargar()" class="btn-download">📊 Descargar Planilla con Análisis</button>
-    </div>
-
     <div class="search-container">
-        <strong style="color:#003366; font-size: 0.8rem;">🔍 BUSCAR POR DNI:</strong>
-        <input type="number" id="buscador" class="search-input" placeholder="Ver historial del agente..." oninput="filtrar()">
+        <strong>🔍 BUSCAR DNI:</strong>
+        <input type="number" id="buscador" class="search-input" oninput="filtrar()">
     </div>
 
     <div class="table-container">
@@ -124,10 +82,10 @@
                 <tr>
                     <th>Estado</th>
                     <th>Organismo</th>
-                    <th>DNI / Agente</th>
-                    <th>Función / Agrup.</th>
+                    <th>Agente</th>
+                    <th>DNI</th>
+                    <th>Función</th>
                     <th>Vigencia</th>
-                    <th>Pres. Depto/RRHH</th>
                     <th>Observación</th>
                 </tr>
             </thead>
@@ -137,27 +95,22 @@
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_apo_v5_final')) || [];
+    let db = JSON.parse(localStorage.getItem('db_final_v5')) || [];
     render();
 
     document.getElementById('formCarga').addEventListener('submit', function(e) {
         e.preventDefault();
-        const registro = {
+        db.push({
             id: Date.now(),
             estado: document.getElementById('estado').value,
             nombre: document.getElementById('nombre').value.toUpperCase(),
             dni: document.getElementById('dni').value,
             funcion: document.getElementById('funcion').value.toUpperCase(),
-            agrupamiento: document.getElementById('agrupamiento').value,
             organismo: document.getElementById('organismo').value,
-            desde: document.getElementById('desde').value || '--',
-            hasta: document.getElementById('hasta').value || '--',
-            pDepto: document.getElementById('pres_depto').value || '--',
-            pRRHH: document.getElementById('pres_rrhh').value || '--',
+            vigencia: document.getElementById('vigencia').value,
             obs: document.getElementById('obs').value.toUpperCase() || 'SIN OBS.'
-        };
-        db.push(registro);
-        localStorage.setItem('db_apo_v5_final', JSON.stringify(db));
+        });
+        localStorage.setItem('db_final_v5', JSON.stringify(db));
         render();
         this.reset();
     });
@@ -169,10 +122,10 @@
             t.innerHTML += `<tr>
                 <td><b>${r.estado}</b></td>
                 <td>${r.organismo}</td>
-                <td>${r.dni}<br><b>${r.nombre}</b></td>
-                <td>${r.funcion}<br><small>${r.agrupamiento}</small></td>
-                <td>${r.desde}<br>${r.hasta}</td>
-                <td>D:${r.pDepto}<br>R:${r.pRRHH}</td>
+                <td>${r.nombre}</td>
+                <td>${r.dni}</td>
+                <td>${r.funcion}</td>
+                <td>${r.vigencia}</td>
                 <td>${r.obs}</td>
             </tr>`;
         });
@@ -181,16 +134,6 @@
     function filtrar() {
         const val = document.getElementById('buscador').value;
         render(db.filter(i => i.dni.includes(val)));
-    }
-
-    function descargar() {
-        let csv = "\uFEFFESTADO;ORGANISMO;AGENTE;DNI;FUNCION;DESDE;HASTA;OBS\n";
-        db.forEach(r => { csv += `${r.estado};${r.organismo};${r.nombre};${r.dni};${r.funcion};${r.desde};${r.hasta};${r.obs}\n`; });
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "Coberturas_APO_V5.csv";
-        link.click();
     }
 </script>
 </body>
