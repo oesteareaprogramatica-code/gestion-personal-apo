@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coberturas APO - V5</title>
+    <title>Coberturas APO - V5 Import</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -18,7 +19,8 @@
         label { display: block; font-size: 0.7rem; font-weight: bold; margin-bottom: 4px; color: #555; }
         input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; outline: none; margin-bottom: 8px; }
 
-        .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .btn-import { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
 
         .main-content { flex-grow: 1; padding: 25px; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
         .search-container { background: #eef2f7; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #d1d9e4; }
@@ -36,57 +38,37 @@
 <div class="sidebar">
     <div class="sidebar-header"><strong>COBERTURAS APO - V5</strong></div>
     
-    <form id="formCarga">
-        <div class="section" style="background: #fff9e6;">
-            <div class="section-title">Control de Estado</div>
-            <select id="estado"><option>PENDIENTE</option><option>AUTORIZADO</option><option>BAJA</option></select>
-        </div>
+    <div class="section" style="background: #e8f5e9; border: 1px solid #c8e6c9;">
+        <div class="section-title" style="color: #2e7d32;">Carga Masiva (Excel)</div>
+        <label>Seleccione su archivo Excel:</label>
+        <input type="file" id="excelInput" accept=".xlsx, .xls" style="font-size: 0.7rem;">
+        <button type="button" class="btn-import" onclick="importarExcel()">📥 Importar desde Excel</button>
+    </div>
 
-        <div class="section">
-            <div class="section-title">Datos del Agente</div>
+    <form id="formCarga">
+        <div class="section"><div class="section-title">Datos Manuales</div>
+            <label>Estado</label><select id="estado"><option>PENDIENTE</option><option>AUTORIZADO</option><option>BAJA</option></select>
             <label>Apellido y Nombre</label><input type="text" id="nombre" required>
             <label>DNI</label><input type="number" id="dni" required>
             <label>Función</label><input type="text" id="funcion" required>
+            <label>Organismo</label><select id="organismo"><option>APO</option><option>TAFI VIEJO</option><option>LULES</option><option>FAMAILLA</option></select>
+            <label>Vigencia</label><input type="text" id="vigencia" placeholder="Desde - Hasta">
+            <label>Observaciones</label><textarea id="obs" rows="2"></textarea>
         </div>
-
-        <div class="section">
-            <div class="section-title">Organismo</div>
-            <select id="organismo">
-                <option>APO</option><option>TAFI VIEJO</option><option>LULES</option><option>FAMAILLA</option>
-            </select>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Vigencia</div>
-            <input type="text" id="vigencia" placeholder="Desde - Hasta">
-        </div>
-
-        <div class="section">
-            <div class="section-title">Observaciones</div>
-            <textarea id="obs" rows="3"></textarea>
-        </div>
-
-        <button type="submit" class="btn-submit">Registrar Cobertura</button>
+        <button type="submit" class="btn-submit">Registrar Individual</button>
     </form>
 </div>
 
 <div class="main-content">
     <div class="search-container">
-        <strong>🔍 BUSCAR DNI:</strong>
+        <strong>🔍 FILTRAR POR DNI:</strong>
         <input type="number" id="buscador" class="search-input" oninput="filtrar()">
     </div>
-
     <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>Estado</th>
-                    <th>Organismo</th>
-                    <th>Agente</th>
-                    <th>DNI</th>
-                    <th>Función</th>
-                    <th>Vigencia</th>
-                    <th>Observación</th>
+                    <th>Estado</th><th>Organismo</th><th>Agente</th><th>DNI</th><th>Función</th><th>Vigencia</th><th>Observación</th>
                 </tr>
             </thead>
             <tbody id="cuerpo"></tbody>
@@ -97,6 +79,38 @@
 <script>
     let db = JSON.parse(localStorage.getItem('db_final_v5')) || [];
     render();
+
+    // Función para IMPORTAR desde Excel
+    function importarExcel() {
+        const input = document.getElementById('excelInput');
+        if (!input.files[0]) return alert("Por favor, seleccione un archivo.");
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+            jsonData.forEach(fila => {
+                db.push({
+                    id: Date.now() + Math.random(),
+                    estado: fila.ESTADO || 'PENDIENTE',
+                    nombre: (fila.AGENTE || '').toUpperCase(),
+                    dni: fila.DNI || '',
+                    funcion: (fila.FUNCION || '').toUpperCase(),
+                    organismo: fila.ORGANISMO || 'APO',
+                    vigencia: fila.VIGENCIA || '',
+                    obs: (fila.OBS || 'IMPORTADO').toUpperCase()
+                });
+            });
+
+            localStorage.setItem('db_final_v5', JSON.stringify(db));
+            render();
+            alert("¡Carga masiva completada con éxito!");
+        };
+        reader.readAsArrayBuffer(input.files[0]);
+    }
 
     document.getElementById('formCarga').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -133,7 +147,7 @@
 
     function filtrar() {
         const val = document.getElementById('buscador').value;
-        render(db.filter(i => i.dni.includes(val)));
+        render(db.filter(i => String(i.dni).includes(val)));
     }
 </script>
 </body>
