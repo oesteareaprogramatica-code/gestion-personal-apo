@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cobertura de Servicio APO - V5 (Estadísticas y Multirregistro)</title>
+    <title>Cobertura de Servicio APO - V5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; --warning: #ffc107; --danger: #dc3545; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
+        /* BARRA LATERAL IZQUIERDA */
         .sidebar { width: 450px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
         .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 10px; border-radius: 4px; }
         
@@ -27,9 +28,9 @@
         .btn-update { background: var(--warning); color: black; display: none; }
         .btn-edit { background: var(--warning); border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.65rem; font-weight: bold; }
         .btn-delete { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.65rem; margin-left: 5px; }
-
         .btn-import { background: #28a745; color: white; margin-top: 8px; font-size: 0.75rem; }
 
+        /* CONTENIDO PRINCIPAL DERECHA */
         .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; }
         .search-container { background: #e1e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-left: 5px solid var(--primary); }
         .search-input { flex-grow: 1; padding: 10px; border: 2px solid var(--primary); border-radius: 4px; font-size: 1rem; font-weight: bold; }
@@ -91,7 +92,6 @@
         <div class="section">
             <div class="section-title">Organismo (Efector)</div>
             <div class="form-group">
-                <label>ORGANISMO (EFECTOR)</label>
                 <select id="organismo" required>
                     <option value="">Seleccione...</option>
                     <option>APO</option><option>CADILLAL</option><option>TAFI DEL VALLE</option>
@@ -111,7 +111,7 @@
 
         <div class="section">
             <div class="section-title">Observaciones</div>
-            <textarea id="observacion" placeholder="Expediente, motivos, etc..."></textarea>
+            <textarea id="observacion" placeholder="Expediente, motivos, etc..." rows="3"></textarea>
         </div>
 
         <button type="submit" id="btnGuardar" class="btn-save">Registrar Cobertura</button>
@@ -248,7 +248,7 @@
     }
 
     function eliminar(index) {
-        if(confirm("¿Eliminar este registro de cobertura?")) {
+        if(confirm("¿Eliminar este registro?")) {
             baseDatos.splice(index, 1);
             guardarYRefrescar();
         }
@@ -269,48 +269,34 @@
             const registros = XLSX.utils.sheet_to_json(sheet);
 
             registros.forEach(fila => {
-                // Lógica para el Estado (Pendiente si está vacío)
-                let estadoExcel = (fila.ESTADO || 'PENDIENTE').toUpperCase();
-                
-                // Lógica para Agrupamiento (Deja en blanco/Sin especificar si está vacío)
-                let agrupExcel = (fila.AGRUPAMIENTO || 'SIN ESPECIFICAR').toUpperCase();
-
                 baseDatos.push({
                     id: Date.now() + Math.random(),
-                    estado: estadoExcel,
+                    estado: (fila.ESTADO || 'PENDIENTE').toUpperCase(),
                     nombre: (fila.AGENTE || fila.NOMBRE || 'S/N').toUpperCase(),
                     dni: String(fila.DNI || '0'),
                     nivel: fila.NIVEL || 'A1',
                     funcion: (fila.FUNCION || 'S/F').toUpperCase(),
-                    agrupamiento: agrupExcel,
+                    agrupamiento: (fila.AGRUPAMIENTO || 'SIN ESPECIFICAR').toUpperCase(),
                     organismo: fila.ORGANISMO || 'APO',
                     desde: fila.DESDE || '---',
                     hasta: fila.HASTA || '---',
-                    pres_oficina: fila.PRES_DEPTO || fila.PRES_OFICINA || '---',
+                    pres_oficina: fila.PRES_DEPTO || '---',
                     pres_rrhh: fila.PRES_RRHH || '---',
-                    observacion: (fila.OBSERVACION || fila.OBS || 'IMPORTADO').toUpperCase()
+                    observacion: (fila.OBSERVACION || 'IMPORTADO').toUpperCase()
                 });
             });
             guardarYRefrescar();
-            alert("¡Importación exitosa! Los estados vacíos se marcaron como PENDIENTE.");
+            alert("¡Importación exitosa!");
             input.value = "";
         };
         reader.readAsArrayBuffer(file);
     }
 
     function exportarCSV() {
-        let csv = "\uFEFF--- REPORTE COBERTURAS APO ---\n";
-        csv += "ESTADO;ORGANISMO;AGENTE;DNI;NIVEL;FUNCION;AGRUPAMIENTO;DESDE;HASTA;PRES_DEPTO;PRES_RRHH;OBSERVACION\n";
-        let stats = { aut: 0, pend: 0, baja: 0, asist: 0, noAsist: 0 };
+        let csv = "\uFEFFESTADO;ORGANISMO;AGENTE;DNI;NIVEL;FUNCION;AGRUPAMIENTO;DESDE;HASTA;PRES_DEPTO;PRES_RRHH;OBSERVACION\n";
         baseDatos.forEach(r => {
             csv += `${r.estado};${r.organismo};${r.nombre};${r.dni};${r.nivel};${r.funcion};${r.agrupamiento};${r.desde};${r.hasta};${r.pres_oficina};${r.pres_rrhh};${r.observacion}\n`;
-            if(r.estado === "AUTORIZADO") stats.aut++;
-            if(r.estado === "PENDIENTE") stats.pend++;
-            if(r.estado === "BAJA") stats.baja++;
-            if(r.agrupamiento === "ASISTENCIAL") stats.asist++;
-            if(r.agrupamiento === "NO ASISTENCIAL") stats.noAsist++;
         });
-        csv += `\nAUTORIZADOS;${stats.aut}\nPENDIENTES;${stats.pend}\nBAJAS;${stats.baja}\n`;
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
