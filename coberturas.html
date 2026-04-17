@@ -3,285 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cobertura de Servicio APO - V5 (Estadísticas y Multirregistro)</title>
+    <title>Registro de Coberturas - APO</title>
     <style>
-        :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; --warning: #ffc107; --danger: #dc3545; }
+        :root { --primary: #003366; --accent: #00b1b2; --bg: #f0f4f7; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        .sidebar { width: 450px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
-        .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 10px; border-radius: 4px; }
-        
-        .section { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
-        .section-title { font-size: 0.7rem; font-weight: bold; color: var(--secondary); margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #ddd; }
-        
-        .form-group { margin-bottom: 8px; }
-        .row { display: flex; gap: 8px; }
-        .row > .form-group { flex: 1; }
-        
-        label { display: block; font-size: 0.65rem; font-weight: bold; margin-bottom: 2px; color: #444; }
-        input, select, textarea { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; }
-        
-        .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
-        .btn-update { background: var(--warning); color: black; display: none; }
-        .btn-edit { background: var(--warning); border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.65rem; font-weight: bold; }
-        .btn-delete { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.65rem; margin-left: 5px; }
+        body { background: var(--bg); margin: 0; padding: 0; }
 
-        .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; }
-        .search-container { background: #e1e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-left: 5px solid var(--primary); }
-        .search-input { flex-grow: 1; padding: 10px; border: 2px solid var(--primary); border-radius: 4px; font-size: 1rem; font-weight: bold; }
+        /* Barra Superior Original */
+        .nav-header { background: var(--primary); color: white; padding: 12px 30px; display: flex; justify-content: space-between; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* Tarjeta Blanca Central (Formato Origen) */
+        .container { max-width: 1000px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
         
-        .table-container { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: auto; flex-grow: 1; border: 1px solid #ddd; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.68rem; }
-        th { background: var(--primary); color: white; position: sticky; top: 0; padding: 10px; text-align: left; z-index: 10; white-space: nowrap; }
-        td { padding: 8px; border-bottom: 1px solid #eee; white-space: nowrap; }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 15px; margin-top: 0; font-size: 22px; }
+
+        /* Formulario Limpio */
+        .grid-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .form-item { display: flex; flex-direction: column; }
+        .full { grid-column: span 3; }
+        .half { grid-column: span 1; }
+
+        label { font-weight: bold; margin-bottom: 5px; color: #444; font-size: 13px; }
+        input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: #fcfcfc; }
+        input:focus { border-color: var(--accent); outline: none; background: white; }
+
+        /* Botones Originales */
+        .btn-group { display: flex; gap: 10px; margin: 25px 0; }
+        button { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-reg { background: var(--primary); color: white; }
+        .btn-excel { background: #28a745; color: white; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Buscador */
+        .search-box { background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .search-box input { flex-grow: 1; border: 2px solid var(--primary); }
+
+        /* Tabla Estilo Original */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th { background: var(--accent); color: white; padding: 12px; text-align: left; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f9f9f9; }
         
-        .status-autorizado { background-color: #d4edda !important; color: #155724; }
-        .status-baja { background-color: #f8d7da !important; color: #721c24; }
+        /* Colores de Estado V5 */
+        .status-autorizado { border-left: 5px solid #28a745; background: #f0fff4; }
+        .status-baja { border-left: 5px solid #dc3545; background: #fff5f5; }
+
+        .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="sidebar-header"><h2>COBERTURAS APO - V5</h2></div>
-    
-    <form id="coberturaForm">
-        <input type="hidden" id="editIndex" value="-1">
-        <input type="hidden" id="idUnico" value="">
+<div class="nav-header">
+    <strong>APO - Gestión de Personal</strong>
+    <span>SIPROSA - Tucumán</span>
+</div>
 
-        <div class="section" style="background: #fff3cd;">
-            <div class="section-title">Control de Estado</div>
-            <div class="form-group">
-                <select id="estado" style="font-weight: bold; border: 2px solid var(--secondary);">
+<div class="container">
+    <h2>Registro de Cobertura de Cargos</h2>
+    
+    <form id="formApo">
+        <div class="grid-form">
+            <div class="form-item">
+                <label>ESTADO:</label>
+                <select id="estado" style="font-weight:bold; color:var(--primary);">
                     <option value="PENDIENTE">⏳ PENDIENTE</option>
                     <option value="AUTORIZADO">✅ AUTORIZADO</option>
                     <option value="BAJA">❌ BAJA</option>
                 </select>
             </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Datos del Agente</div>
-            <div class="form-group"><label>APELLIDO Y NOMBRE</label><input type="text" id="nombre" required></div>
-            <div class="row">
-                <div class="form-group"><label>DNI</label><input type="number" id="dni" required></div>
-                <div class="form-group">
-                    <label>NIVEL</label>
-                    <select id="nivel">
-                        <option>A1</option><option>A2</option><option>A3</option><option>B1</option><option>B</option><option>C</option><option>D</option>
-                    </select>
-                </div>
+            <div class="form-item">
+                <label>Nombre del Agente:</label>
+                <input type="text" id="nombre" placeholder="Apellido y Nombre" required>
             </div>
-            <div class="row">
-                <div class="form-group" style="flex:2;"><label>FUNCIÓN</label><input type="text" id="funcion" required></div>
-                <div class="form-group" style="flex:1;">
-                    <label>AGRUPAMIENTO</label>
-                    <select id="agrupamiento">
-                        <option value="ASISTENCIAL">ASIST.</option>
-                        <option value="NO ASISTENCIAL">NO ASIST.</option>
-                    </select>
-                </div>
+            <div class="form-item">
+                <label>DNI:</label>
+                <input type="number" id="dni" required>
             </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Organismo y Control Temporal</div>
-            <div class="form-group">
-                <label>ORGANISMO (EFECTOR)</label>
-                <select id="organismo" required>
-                    <option value="">Seleccione...</option>
-                    <option>APO</option>
-                    <option>AO VALLES CALCHAQUIES</option><option>TAFI DEL VALLE</option>
-                    <option>TAFI VIEJO</option><option>CADILLAL</option>
-                    <option>TRANCAS</option><option>ALTA MONTAÑA</option>
-                    <option>FAMAILLA</option><option>SAN PABLO</option><option>LULES</option>
+            <div class="form-item">
+                <label>Función / Cargo:</label>
+                <input type="text" id="cargo" required>
+            </div>
+            <div class="form-item">
+                <label>Vigencia (Desde - Hasta):</label>
+                <input type="text" id="vigencia" placeholder="ej: 01/04 al 15/04">
+            </div>
+            <div class="form-item">
+                <label>Efector (Organismo):</label>
+                <select id="organismo">
+                    <option>APO</option><option>TAFI DEL VALLE</option><option>LULES</option><option>FAMAILLA</option>
                 </select>
             </div>
-            <div class="row">
-                <div class="form-group"><label>DESDE</label><input type="date" id="desde"></div>
-                <div class="form-group"><label>HASTA</label><input type="date" id="hasta"></div>
-            </div>
-            <div class="row">
-                <div class="form-group"><label>PRES. DEPTO</label><input type="date" id="pres_oficina"></div>
-                <div class="form-group"><label>PRES. RRHH</label><input type="date" id="pres_rrhh"></div>
+            <div class="form-item full">
+                <label>Observaciones:</label>
+                <textarea id="obs" rows="3" placeholder="Motivo del reemplazo, expediente..."></textarea>
             </div>
         </div>
 
-        <div class="section">
-            <div class="section-title">Observaciones</div>
-            <textarea id="observacion" placeholder="Expediente, motivos, etc..."></textarea>
+        <div class="btn-group">
+            <button type="submit" class="btn-reg">Registrar en Tabla</button>
+            <button type="button" class="btn-excel" onclick="exportar()">Descargar Reporte Excel</button>
         </div>
-
-        <button type="submit" id="btnGuardar" class="btn-save">Registrar Cobertura</button>
-        <button type="button" id="btnActualizar" class="btn-save btn-update" onclick="finalizarEdicion()">Confirmar Edición</button>
-        <button type="button" id="btnCancelar" class="btn-save" style="background:#666; display:none; margin-top:5px;" onclick="cancelarEdicion()">Cancelar</button>
     </form>
-</div>
 
-<div class="main-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h2 style="color:var(--primary); margin:0;">Registro de Cobertura Provisoria - APO</h2>
-        <button onclick="exportarCSV()" style="background:#1f7244; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; font-weight:bold;">📥 Descargar Planilla con Análisis</button>
+    <div class="search-box">
+        <strong style="color:var(--primary)">🔍 BUSCAR DNI:</strong>
+        <input type="text" id="busqueda" placeholder="Filtrar por documento..." oninput="filtrar()">
     </div>
 
-    <div class="search-container">
-        <strong style="color:var(--primary);">🔍 BUSCAR POR DNI:</strong>
-        <input type="number" id="inputBusqueda" class="search-input" placeholder="Ver historial del agente..." oninput="filtrarTabla()">
-    </div>
-
-    <div class="table-container">
-        <table id="mainTable">
+    <div class="table-wrap">
+        <table>
             <thead>
                 <tr>
-                    <th>ACCIONES</th><th>ESTADO</th><th>ORGANISMO</th><th>DNI / AGENTE</th><th>FUNCIÓN / AGRUP.</th><th>VIGENCIA</th><th>PRES. DEPTO/RRHH</th><th>OBSERVACIÓN</th>
+                    <th>Estado</th>
+                    <th>Agente</th>
+                    <th>DNI</th>
+                    <th>Cargo</th>
+                    <th>Vigencia</th>
+                    <th>Observaciones</th>
+                    <th>Acción</th>
                 </tr>
             </thead>
             <tbody id="cuerpoTabla"></tbody>
         </table>
     </div>
+
+    <div class="footer">
+        Área Programática Oeste | Hospitales y CAPS | Departamento de Personal
+    </div>
 </div>
 
 <script>
-    let baseDatos = JSON.parse(localStorage.getItem('db_cobertura_v5')) || [];
-    render(baseDatos);
+    let db = JSON.parse(localStorage.getItem('db_apo_final')) || [];
+    render();
 
-    function filtrarTabla() {
-        const busqueda = document.getElementById('inputBusqueda').value;
-        if (busqueda === "") { render(baseDatos); } 
-        else { render(baseDatos.filter(a => a.dni.includes(busqueda))); }
-    }
-
-    document.getElementById('coberturaForm').addEventListener('submit', function(e) {
+    document.getElementById('formApo').addEventListener('submit', function(e) {
         e.preventDefault();
-        let registro = obtenerDatosForm();
-        registro.id = Date.now();
-        baseDatos.push(registro);
-        guardarYRefrescar();
-        this.reset();
-    });
-
-    function obtenerDatosForm() {
-        return {
-            id: document.getElementById('idUnico').value || Date.now(),
+        const nuevo = {
+            id: Date.now(),
             estado: document.getElementById('estado').value,
             nombre: document.getElementById('nombre').value.toUpperCase(),
             dni: document.getElementById('dni').value,
-            nivel: document.getElementById('nivel').value,
-            funcion: document.getElementById('funcion').value.toUpperCase(),
-            agrupamiento: document.getElementById('agrupamiento').value,
-            organismo: document.getElementById('organismo').value,
-            desde: document.getElementById('desde').value || '---',
-            hasta: document.getElementById('hasta').value || '---',
-            pres_oficina: document.getElementById('pres_oficina').value || '---',
-            pres_rrhh: document.getElementById('pres_rrhh').value || '---',
-            observacion: document.getElementById('observacion').value.toUpperCase() || 'SIN OBSERVACIONES'
+            cargo: document.getElementById('cargo').value.toUpperCase(),
+            vigencia: document.getElementById('vigencia').value,
+            obs: document.getElementById('obs').value.toUpperCase() || 'SIN OBS.'
         };
+        db.push(nuevo);
+        guardar();
+        this.reset();
+    });
+
+    function guardar() {
+        localStorage.setItem('db_apo_final', JSON.stringify(db));
+        render();
     }
 
-    function render(datos) {
+    function render(datos = db) {
         const t = document.getElementById('cuerpoTabla');
         t.innerHTML = "";
-        const datosOrdenados = [...datos].reverse();
-
-        datosOrdenados.forEach((r) => {
-            const indexOrig = baseDatos.findIndex(x => x.id == r.id);
+        [...datos].reverse().forEach(r => {
             let clase = r.estado === "AUTORIZADO" ? "status-autorizado" : (r.estado === "BAJA" ? "status-baja" : "");
-
             t.innerHTML += `<tr class="${clase}">
-                <td>
-                    <button class="btn-edit" onclick="prepararEdicion(${indexOrig})">EDITAR</button>
-                    <button class="btn-delete" onclick="eliminar(${indexOrig})">🗑️</button>
-                </td>
                 <td><b>${r.estado}</b></td>
-                <td>${r.organismo}</td>
-                <td>${r.dni}<br><b>${r.nombre}</b></td>
-                <td>${r.funcion}<br><small>${r.agrupamiento}</small></td>
-                <td>${r.desde}<br>${r.hasta}</td>
-                <td>D:${r.pres_oficina}<br>R:${r.pres_rrhh}</td>
-                <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">${r.observacion}</td>
+                <td>${r.nombre}</td>
+                <td>${r.dni}</td>
+                <td>${r.cargo}</td>
+                <td>${r.vigencia}</td>
+                <td>${r.obs}</td>
+                <td><button onclick="borrar(${r.id})" style="background:none; border:none; cursor:pointer;">🗑️</button></td>
             </tr>`;
         });
     }
 
-    function prepararEdicion(index) {
-        const r = baseDatos[index];
-        document.getElementById('editIndex').value = index;
-        document.getElementById('idUnico').value = r.id;
-        document.getElementById('estado').value = r.estado;
-        document.getElementById('nombre').value = r.nombre;
-        document.getElementById('dni').value = r.dni;
-        document.getElementById('nivel').value = r.nivel;
-        document.getElementById('funcion').value = r.funcion;
-        document.getElementById('agrupamiento').value = r.agrupamiento;
-        document.getElementById('organismo').value = r.organismo;
-        document.getElementById('desde').value = r.desde === '---' ? '' : r.desde;
-        document.getElementById('hasta').value = r.hasta === '---' ? '' : r.hasta;
-        document.getElementById('pres_oficina').value = r.pres_oficina === '---' ? '' : r.pres_oficina;
-        document.getElementById('pres_rrhh').value = r.pres_rrhh === '---' ? '' : r.pres_rrhh;
-        document.getElementById('observacion').value = r.observacion === 'SIN OBSERVACIONES' ? '' : r.observacion;
-
-        document.getElementById('btnGuardar').style.display = 'none';
-        document.getElementById('btnActualizar').style.display = 'block';
-        document.getElementById('btnCancelar').style.display = 'block';
+    function filtrar() {
+        const val = document.getElementById('busqueda').value;
+        render(db.filter(i => i.dni.includes(val) || i.nombre.includes(val.toUpperCase())));
     }
 
-    function finalizarEdicion() {
-        const index = document.getElementById('editIndex').value;
-        baseDatos[index] = obtenerDatosForm();
-        guardarYRefrescar();
-        cancelarEdicion();
-    }
-
-    function cancelarEdicion() {
-        document.getElementById('coberturaForm').reset();
-        document.getElementById('editIndex').value = "-1";
-        document.getElementById('idUnico').value = "";
-        document.getElementById('btnGuardar').style.display = 'block';
-        document.getElementById('btnActualizar').style.display = 'none';
-        document.getElementById('btnCancelar').style.display = 'none';
-    }
-
-    function eliminar(index) {
-        if(confirm("¿Eliminar este registro de cobertura?")) {
-            baseDatos.splice(index, 1);
-            guardarYRefrescar();
+    function borrar(id) {
+        if(confirm("¿Eliminar registro?")) {
+            db = db.filter(i => i.id !== id);
+            guardar();
         }
     }
 
-    function guardarYRefrescar() {
-        localStorage.setItem('db_cobertura_v5', JSON.stringify(baseDatos));
-        render(baseDatos);
-    }
-
-    function exportarCSV() {
-        let csv = "\uFEFF--- REPORTE COBERTURAS APO ---\n";
-        csv += "ESTADO;ORGANISMO;AGENTE;DNI;NIVEL;FUNCION;AGRUPAMIENTO;DESDE;HASTA;PRES_DEPTO;PRES_RRHH;OBSERVACION\n";
-        
-        let stats = { aut: 0, pend: 0, baja: 0, asist: 0, noAsist: 0 };
-
-        baseDatos.forEach(r => {
-            csv += `${r.estado};${r.organismo};${r.nombre};${r.dni};${r.nivel};${r.funcion};${r.agrupamiento};${r.desde};${r.hasta};${r.pres_oficina};${r.pres_rrhh};${r.observacion}\n`;
-            if(r.estado === "AUTORIZADO") stats.aut++;
-            if(r.estado === "PENDIENTE") stats.pend++;
-            if(r.estado === "BAJA") stats.baja++;
-            if(r.agrupamiento === "ASISTENCIAL") stats.asist++;
-            if(r.agrupamiento === "NO ASISTENCIAL") stats.noAsist++;
-        });
-
-        csv += "\n\n--- ANALISIS ESTADISTICO ---\n";
-        csv += `TOTAL REGISTROS;${baseDatos.length}\n`;
-        csv += `AUTORIZADOS;${stats.aut}\n`;
-        csv += `PENDIENTES;${stats.pend}\n`;
-        csv += `BAJAS;${stats.baja}\n`;
-        csv += `PERSONAL ASISTENCIAL;${stats.asist}\n`;
-        csv += `PERSONAL NO ASISTENCIAL;${stats.noAsist}\n`;
-
+    function exportar() {
+        let csv = "\uFEFFESTADO;AGENTE;DNI;CARGO;VIGENCIA;OBSERVACIONES\n";
+        db.forEach(r => { csv += `${r.estado};${r.nombre};${r.dni};${r.cargo};${r.vigencia};${r.obs}\n`; });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", `COBERTURAS_APO_V5_${new Date().toLocaleDateString()}.csv`);
+        link.download = "Reporte_APO.csv";
         link.click();
     }
 </script>
+
 </body>
 </html>
