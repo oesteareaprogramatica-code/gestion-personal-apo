@@ -5,51 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Coberturas - APO</title>
     <style>
+        /* Estilos Base Estilo Inicial */
         :root { --primary: #003366; --accent: #00b1b2; --bg: #f0f4f7; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); margin: 0; padding: 0; }
 
-        /* Barra Superior Original */
-        .nav-header { background: var(--primary); color: white; padding: 12px 30px; display: flex; justify-content: space-between; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* Barra Azul Superior Fina */
+        .nav-header { background: var(--primary); color: white; padding: 10px 30px; display: flex; justify-content: space-between; font-size: 13px; }
 
-        /* Tarjeta Blanca Central (Formato Origen) */
-        .container { max-width: 1000px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        /* La Tarjeta Blanca Centrada (Clave del Formato Inicial) */
+        .main-card { 
+            max-width: 950px; 
+            margin: 40px auto; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.05); 
+        }
         
-        h2 { color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 15px; margin-top: 0; font-size: 22px; }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 15px; margin-top: 0; font-size: 20px; }
 
-        /* Formulario Limpio */
-        .grid-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
-        .form-item { display: flex; flex-direction: column; }
-        .full { grid-column: span 3; }
-        .half { grid-column: span 1; }
+        /* Formulario Organizado */
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        .full-row { grid-column: span 3; }
 
         label { font-weight: bold; margin-bottom: 5px; color: #444; font-size: 13px; }
-        input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: #fcfcfc; }
+        input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; background: #fafafa; }
         input:focus { border-color: var(--accent); outline: none; background: white; }
 
-        /* Botones Originales */
-        .btn-group { display: flex; gap: 10px; margin: 25px 0; }
-        button { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-reg { background: var(--primary); color: white; }
-        .btn-excel { background: #28a745; color: white; }
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        /* Botones del Formato Original */
+        .btn-container { display: flex; gap: 12px; margin: 25px 0; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-save { background: var(--primary); color: white; }
+        .btn-export { background: #28a745; color: white; }
+        button:hover { opacity: 0.9; }
 
-        /* Buscador */
-        .search-box { background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .search-box input { flex-grow: 1; border: 2px solid var(--primary); }
+        /* Buscador Integrado */
+        .search-area { margin-bottom: 20px; display: flex; align-items: center; gap: 10px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #eee; }
+        .search-area input { flex-grow: 1; border: 1px solid var(--primary); }
 
         /* Tabla Estilo Original */
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th { background: var(--accent); color: white; padding: 12px; text-align: left; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
-        tr:hover { background: #f9f9f9; }
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: var(--accent); color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #eee; color: #333; }
         
-        /* Colores de Estado V5 */
-        .status-autorizado { border-left: 5px solid #28a745; background: #f0fff4; }
-        .status-baja { border-left: 5px solid #dc3545; background: #fff5f5; }
+        /* Colores de Estado Discretos */
+        .row-autorizado { background-color: #f0fff4; border-left: 4px solid #28a745; }
+        .row-baja { background-color: #fff5f5; border-left: 4px solid #dc3545; }
 
-        .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 15px; }
+        .footer-note { text-align: center; margin-top: 30px; font-size: 11px; color: #aaa; }
     </style>
 </head>
 <body>
@@ -59,59 +65,59 @@
     <span>SIPROSA - Tucumán</span>
 </div>
 
-<div class="container">
+<div class="main-card">
     <h2>Registro de Cobertura de Cargos</h2>
     
-    <form id="formApo">
-        <div class="grid-form">
-            <div class="form-item">
+    <form id="formRegistro">
+        <div class="form-grid">
+            <div class="form-group">
                 <label>ESTADO:</label>
-                <select id="estado" style="font-weight:bold; color:var(--primary);">
+                <select id="estado">
                     <option value="PENDIENTE">⏳ PENDIENTE</option>
                     <option value="AUTORIZADO">✅ AUTORIZADO</option>
                     <option value="BAJA">❌ BAJA</option>
                 </select>
             </div>
-            <div class="form-item">
+            <div class="form-group">
                 <label>Nombre del Agente:</label>
                 <input type="text" id="nombre" placeholder="Apellido y Nombre" required>
             </div>
-            <div class="form-item">
+            <div class="form-group">
                 <label>DNI:</label>
                 <input type="number" id="dni" required>
             </div>
-            <div class="form-item">
+            <div class="form-group">
                 <label>Función / Cargo:</label>
                 <input type="text" id="cargo" required>
             </div>
-            <div class="form-item">
+            <div class="form-group">
                 <label>Vigencia (Desde - Hasta):</label>
-                <input type="text" id="vigencia" placeholder="ej: 01/04 al 15/04">
+                <input type="text" id="vigencia" placeholder="ej: 01/04 al 30/04">
             </div>
-            <div class="form-item">
-                <label>Efector (Organismo):</label>
-                <select id="organismo">
+            <div class="form-group">
+                <label>Efector:</label>
+                <select id="efector">
                     <option>APO</option><option>TAFI DEL VALLE</option><option>LULES</option><option>FAMAILLA</option>
                 </select>
             </div>
-            <div class="form-item full">
+            <div class="form-group full-row">
                 <label>Observaciones:</label>
-                <textarea id="obs" rows="3" placeholder="Motivo del reemplazo, expediente..."></textarea>
+                <textarea id="obs" rows="2" placeholder="Motivo, expediente..."></textarea>
             </div>
         </div>
 
-        <div class="btn-group">
-            <button type="submit" class="btn-reg">Registrar en Tabla</button>
-            <button type="button" class="btn-excel" onclick="exportar()">Descargar Reporte Excel</button>
+        <div class="btn-container">
+            <button type="submit" class="btn-save">Registrar en Tabla</button>
+            <button type="button" class="btn-export" onclick="exportarExcel()">Descargar Reporte Excel</button>
         </div>
     </form>
 
-    <div class="search-box">
-        <strong style="color:var(--primary)">🔍 BUSCAR DNI:</strong>
-        <input type="text" id="busqueda" placeholder="Filtrar por documento..." oninput="filtrar()">
+    <div class="search-area">
+        <strong style="color:var(--primary); font-size: 12px;">🔍 BUSCAR DNI:</strong>
+        <input type="text" id="filtro" placeholder="Filtrar registros..." oninput="filtrarTabla()">
     </div>
 
-    <div class="table-wrap">
+    <div class="table-container">
         <table>
             <thead>
                 <tr>
@@ -121,80 +127,80 @@
                     <th>Cargo</th>
                     <th>Vigencia</th>
                     <th>Observaciones</th>
-                    <th>Acción</th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody id="cuerpoTabla"></tbody>
+            <tbody id="tablaCuerpo"></tbody>
         </table>
     </div>
 
-    <div class="footer">
+    <div class="footer-note">
         Área Programática Oeste | Hospitales y CAPS | Departamento de Personal
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_apo_final')) || [];
-    render();
+    let datosApo = JSON.parse(localStorage.getItem('db_apo_v1')) || [];
+    actualizarTabla();
 
-    document.getElementById('formApo').addEventListener('submit', function(e) {
+    document.getElementById('formRegistro').addEventListener('submit', function(e) {
         e.preventDefault();
-        const nuevo = {
+        const registro = {
             id: Date.now(),
             estado: document.getElementById('estado').value,
             nombre: document.getElementById('nombre').value.toUpperCase(),
             dni: document.getElementById('dni').value,
             cargo: document.getElementById('cargo').value.toUpperCase(),
             vigencia: document.getElementById('vigencia').value,
-            obs: document.getElementById('obs').value.toUpperCase() || 'SIN OBS.'
+            obs: document.getElementById('obs').value.toUpperCase() || 'SIN OBSERVACIONES'
         };
-        db.push(nuevo);
+        datosApo.push(registro);
         guardar();
         this.reset();
     });
 
     function guardar() {
-        localStorage.setItem('db_apo_final', JSON.stringify(db));
-        render();
+        localStorage.setItem('db_apo_v1', JSON.stringify(datosApo));
+        actualizarTabla();
     }
 
-    function render(datos = db) {
-        const t = document.getElementById('cuerpoTabla');
-        t.innerHTML = "";
-        [...datos].reverse().forEach(r => {
-            let clase = r.estado === "AUTORIZADO" ? "status-autorizado" : (r.estado === "BAJA" ? "status-baja" : "");
-            t.innerHTML += `<tr class="${clase}">
+    function actualizarTabla(lista = datosApo) {
+        const tbody = document.getElementById('tablaCuerpo');
+        tbody.innerHTML = "";
+        [...lista].reverse().forEach(r => {
+            let estilo = r.estado === "AUTORIZADO" ? "row-autorizado" : (r.estado === "BAJA" ? "row-baja" : "");
+            tbody.innerHTML += `<tr class="${estilo}">
                 <td><b>${r.estado}</b></td>
                 <td>${r.nombre}</td>
                 <td>${r.dni}</td>
                 <td>${r.cargo}</td>
                 <td>${r.vigencia}</td>
                 <td>${r.obs}</td>
-                <td><button onclick="borrar(${r.id})" style="background:none; border:none; cursor:pointer;">🗑️</button></td>
+                <td><button onclick="quitar(${r.id})" style="background:none; color:red; font-size:16px;">×</button></td>
             </tr>`;
         });
     }
 
-    function filtrar() {
-        const val = document.getElementById('busqueda').value;
-        render(db.filter(i => i.dni.includes(val) || i.nombre.includes(val.toUpperCase())));
+    function filtrarTabla() {
+        const term = document.getElementById('filtro').value.toLowerCase();
+        actualizarTabla(datosApo.filter(d => d.dni.includes(term) || d.nombre.toLowerCase().includes(term)));
     }
 
-    function borrar(id) {
+    function quitar(id) {
         if(confirm("¿Eliminar registro?")) {
-            db = db.filter(i => i.id !== id);
+            datosApo = datosApo.filter(x => x.id !== id);
             guardar();
         }
     }
 
-    function exportar() {
+    function exportarExcel() {
         let csv = "\uFEFFESTADO;AGENTE;DNI;CARGO;VIGENCIA;OBSERVACIONES\n";
-        db.forEach(r => { csv += `${r.estado};${r.nombre};${r.dni};${r.cargo};${r.vigencia};${r.obs}\n`; });
+        datosApo.forEach(r => { csv += `${r.estado};${r.nombre};${r.dni};${r.cargo};${r.vigencia};${r.obs}\n`; });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "Reporte_APO.csv";
-        link.click();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "Reporte_APO.csv";
+        a.click();
     }
 </script>
 
