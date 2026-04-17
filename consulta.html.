@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONSULTA - Coberturas APO</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root { --primary: #003366; --secondary: #00509d; --light: #f4f7f9; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--light); margin: 0; padding: 20px; display: flex; flex-direction: column; height: 100vh; }
+        .header { background: var(--primary); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .search-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; gap: 15px; align-items: center; }
+        .search-input { flex-grow: 1; padding: 12px; border: 2px solid var(--primary); border-radius: 4px; font-size: 1.1rem; }
+        .btn-import { background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .table-container { background: white; border-radius: 8px; overflow: auto; flex-grow: 1; border: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: var(--primary); color: white; position: sticky; top: 0; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .status-autorizado { background-color: #d4edda !important; color: #155724; }
+        .status-baja { background-color: #f8d7da !important; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2 style="margin:0;">🔍 Módulo de Consulta - APO</h2>
+    <p style="margin:5px 0 0 0; font-size: 0.9rem;">Área Programática Oeste - SIPROSA Tucumán</p>
+</div>
+
+<div class="search-container">
+    <input type="text" id="inputBusqueda" class="search-input" placeholder="Buscar por Nombre o DNI..." oninput="filtrar()">
+    <input type="file" id="importExcel" accept=".xlsx, .xls" style="display:none;" onchange="importar(this)">
+    <button class="btn-import" onclick="document.getElementById('importExcel').click()">📥 CARGAR BASE DE DATOS</button>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ESTADO</th><th>ORGANISMO</th><th>DNI / AGENTE</th><th>FUNCIÓN</th><th>VIGENCIA</th><th>OBSERVACIÓN</th>
+            </tr>
+        </thead>
+        <tbody id="tabla">
+            <tr><td colspan="6" style="text-align:center; padding:30px; color:#666;">Por favor, cargue el archivo Excel para visualizar los registros.</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    let datosCargados = [];
+
+    function importar(input) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            // Convertimos el Excel a una lista que el buscador entienda
+            datosCargados = XLSX.utils.sheet_to_json(sheet);
+            render(datosCargados);
+            alert("Información cargada correctamente.");
+        };
+        reader.readAsArrayBuffer(input.files[0]);
+    }
+
+    function render(lista) {
+        const t = document.getElementById('tabla');
+        t.innerHTML = lista.map(r => {
+            // Buscamos las columnas sin importar si vienen de tu CSV o de un Excel manual
+            const estado = (r.ESTADO || r.estado || '').toUpperCase();
+            const clase = estado === "AUTORIZADO" ? "status-autorizado" : (estado === "BAJA" ? "status-baja" : "");
+            return `<tr class="${clase}">
+                <td><b>${estado}</b></td>
+                <td>${r.ORGANISMO || r.organismo || ''}</td>
+                <td>${r.DNI || r.dni || ''}<br><b>${r.AGENTE || r.agente || r.nombre || ''}</b></td>
+                <td>${r.FUNCION || r.funcion || ''}</td>
+                <td>${r.DESDE || r.desde || ''} al ${r.HASTA || r.hasta || ''}</td>
+                <td>${r.OBSERVACION || r.observacion || ''}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function filtrar() {
+        const b = document.getElementById('inputBusqueda').value.toUpperCase();
+        const filtrados = datosCargados.filter(r => 
+            String(r.DNI || r.dni).includes(b) || 
+            String(r.AGENTE || r.agente || r.nombre || '').toUpperCase().includes(b)
+        );
+        render(filtrados);
+    }
+</script>
+</body>
+</html>
