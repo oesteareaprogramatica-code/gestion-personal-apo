@@ -3,131 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coberturas APO - V5 Import</title>
+    <title>Registro de Coberturas APO - Original</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; }
+        :root { --primary: #003366; --accent: #00b1b2; --bg: #f0f4f7; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); margin: 0; padding: 0; }
 
-        .sidebar { width: 400px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
-        .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 15px; border-radius: 4px; text-transform: uppercase; font-size: 0.9rem; }
+        /* Barra Superior */
+        .nav-header { background: var(--primary); color: white; padding: 12px 30px; display: flex; justify-content: space-between; font-size: 14px; }
+
+        /* Tarjeta Blanca Centrada (EL MODELO ORIGINAL) */
+        .main-card { 
+            max-width: 1000px; 
+            margin: 30px auto; 
+            background: white; 
+            padding: 35px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+        }
         
-        .section { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
-        .section-title { font-size: 0.75rem; font-weight: bold; color: var(--secondary); margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-top: 0; font-size: 20px; text-transform: uppercase; }
+
+        /* Secciones de Formulario */
+        .section-box { border: 1px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 20px; background: #fcfcfc; }
+        .section-title { font-size: 11px; font-weight: bold; color: var(--accent); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #eee; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        .full { grid-column: span 3; }
+
+        label { font-weight: bold; margin-bottom: 5px; color: #444; font-size: 12px; }
+        input, select, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 13px; }
         
-        label { display: block; font-size: 0.7rem; font-weight: bold; margin-bottom: 4px; color: #555; }
-        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; outline: none; margin-bottom: 8px; }
+        /* Botones Estilo Original */
+        .btn-group { display: flex; gap: 10px; margin: 20px 0; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-excel { background: #28a745; color: white; }
+        .btn-import { background: #6c757d; color: white; }
 
-        .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
-        .btn-import { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
+        /* Buscador */
+        .search-bar { background: #eef2f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .search-bar input { flex-grow: 1; border: 2px solid var(--primary); padding: 8px; border-radius: 4px; }
 
-        .main-content { flex-grow: 1; padding: 25px; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
-        .search-container { background: #eef2f7; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #d1d9e4; }
-        .search-input { flex-grow: 1; padding: 10px; border: 2px solid #003366; border-radius: 4px; font-size: 1rem; }
+        /* Tabla Profesional */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { background: var(--primary); color: white; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+        tr:nth-child(even) { background: #f9f9f9; }
 
-        .table-container { border: 1px solid #ddd; border-radius: 4px; overflow: auto; flex-grow: 1; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 800px; }
-        th { background: var(--primary); color: white; position: sticky; top: 0; padding: 12px; text-align: left; z-index: 10; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
+        .footer { text-align: center; margin-top: 20px; font-size: 11px; color: #999; }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="sidebar-header"><strong>COBERTURAS APO - V5</strong></div>
-    
-    <div class="section" style="background: #e8f5e9; border: 1px solid #c8e6c9;">
-        <div class="section-title" style="color: #2e7d32;">Carga Masiva (Excel)</div>
-        <label>Seleccione su archivo Excel:</label>
-        <input type="file" id="excelInput" accept=".xlsx, .xls" style="font-size: 0.7rem;">
-        <button type="button" class="btn-import" onclick="importarExcel()">📥 Importar desde Excel</button>
-    </div>
-
-    <form id="formCarga">
-        <div class="section"><div class="section-title">Datos Manuales</div>
-            <label>Estado</label><select id="estado"><option>PENDIENTE</option><option>AUTORIZADO</option><option>BAJA</option></select>
-            <label>Apellido y Nombre</label><input type="text" id="nombre" required>
-            <label>DNI</label><input type="number" id="dni" required>
-            <label>Función</label><input type="text" id="funcion" required>
-            <label>Organismo</label><select id="organismo"><option>APO</option><option>TAFI VIEJO</option><option>LULES</option><option>FAMAILLA</option></select>
-            <label>Vigencia</label><input type="text" id="vigencia" placeholder="Desde - Hasta">
-            <label>Observaciones</label><textarea id="obs" rows="2"></textarea>
-        </div>
-        <button type="submit" class="btn-submit">Registrar Individual</button>
-    </form>
+<div class="nav-header">
+    <strong>APO - Gestión de Personal</strong>
+    <span>SIPROSA - Tucumán</span>
 </div>
 
-<div class="main-content">
-    <div class="search-container">
-        <strong>🔍 FILTRAR POR DNI:</strong>
-        <input type="number" id="buscador" class="search-input" oninput="filtrar()">
+<div class="main-card">
+    <h2>Registro de Cobertura Provisoria</h2>
+    
+    <form id="formApo">
+        <div class="section-box">
+            <div class="section-title">Datos del Agente y Cargo</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="estado"><option>PENDIENTE</option><option>AUTORIZADO</option><option>BAJA</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Apellido y Nombre</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>DNI</label>
+                    <input type="number" id="dni" required>
+                </div>
+                <div class="form-group">
+                    <label>Nivel</label>
+                    <select id="nivel"><option>A1</option><option>A2</option><option>B1</option><option>C</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Función</label>
+                    <input type="text" id="funcion" required>
+                </div>
+                <div class="form-group">
+                    <label>Agrupamiento</label>
+                    <select id="agrupamiento"><option>ASISTENCIAL</option><option>NO ASISTENCIAL</option></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title">Efector y Vigencia</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Organismo (Efector)</label>
+                    <select id="organismo">
+                        <option>APO</option><option>TAFI DEL VALLE</option><option>LULES</option><option>FAMAILLA</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Desde</label><input type="date" id="desde"></div>
+                <div class="form-group"><label>Hasta</label><input type="date" id="hasta"></div>
+                <div class="form-group"><label>Pres. Depto</label><input type="date" id="pDepto"></div>
+                <div class="form-group"><label>Pres. RRHH</label><input type="date" id="pRRHH"></div>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title">Observaciones</div>
+            <textarea id="obs" class="full" rows="2" style="width:100%"></textarea>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="btn-add">Registrar Agente</button>
+            <button type="button" class="btn-excel" onclick="exportar()">Descargar Excel</button>
+            <input type="file" id="importFile" style="display:none" onchange="importar(this)">
+            <button type="button" class="btn-import" onclick="document.getElementById('importFile').click()">Importar Excel</button>
+        </div>
+    </form>
+
+    <div class="search-bar">
+        <strong>🔍 BUSCAR:</strong>
+        <input type="text" id="buscador" placeholder="Buscar por DNI o Nombre..." oninput="filtrar()">
     </div>
-    <div class="table-container">
+
+    <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>Estado</th><th>Organismo</th><th>Agente</th><th>DNI</th><th>Función</th><th>Vigencia</th><th>Observación</th>
+                    <th>Estado</th>
+                    <th>Efector</th>
+                    <th>Agente / DNI</th>
+                    <th>Cargo / Nivel</th>
+                    <th>Vigencia</th>
+                    <th>Presentación</th>
+                    <th>Observaciones</th>
                 </tr>
             </thead>
             <tbody id="cuerpo"></tbody>
         </table>
     </div>
+
+    <div class="footer">Área Programática Oeste | Tucumán</div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_final_v5')) || [];
+    let db = JSON.parse(localStorage.getItem('db_apo_full')) || [];
     render();
 
-    // Función para IMPORTAR desde Excel
-    function importarExcel() {
-        const input = document.getElementById('excelInput');
-        if (!input.files[0]) return alert("Por favor, seleccione un archivo.");
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-            jsonData.forEach(fila => {
-                db.push({
-                    id: Date.now() + Math.random(),
-                    estado: fila.ESTADO || 'PENDIENTE',
-                    nombre: (fila.AGENTE || '').toUpperCase(),
-                    dni: fila.DNI || '',
-                    funcion: (fila.FUNCION || '').toUpperCase(),
-                    organismo: fila.ORGANISMO || 'APO',
-                    vigencia: fila.VIGENCIA || '',
-                    obs: (fila.OBS || 'IMPORTADO').toUpperCase()
-                });
-            });
-
-            localStorage.setItem('db_final_v5', JSON.stringify(db));
-            render();
-            alert("¡Carga masiva completada con éxito!");
-        };
-        reader.readAsArrayBuffer(input.files[0]);
-    }
-
-    document.getElementById('formCarga').addEventListener('submit', function(e) {
+    document.getElementById('formApo').addEventListener('submit', function(e) {
         e.preventDefault();
-        db.push({
+        const r = {
             id: Date.now(),
             estado: document.getElementById('estado').value,
             nombre: document.getElementById('nombre').value.toUpperCase(),
             dni: document.getElementById('dni').value,
+            nivel: document.getElementById('nivel').value,
             funcion: document.getElementById('funcion').value.toUpperCase(),
+            agrupamiento: document.getElementById('agrupamiento').value,
             organismo: document.getElementById('organismo').value,
-            vigencia: document.getElementById('vigencia').value,
+            desde: document.getElementById('desde').value,
+            hasta: document.getElementById('hasta').value,
+            pDepto: document.getElementById('pDepto').value,
+            pRRHH: document.getElementById('pRRHH').value,
             obs: document.getElementById('obs').value.toUpperCase() || 'SIN OBS.'
-        });
-        localStorage.setItem('db_final_v5', JSON.stringify(db));
-        render();
+        };
+        db.push(r);
+        guardar();
         this.reset();
     });
+
+    function guardar() {
+        localStorage.setItem('db_apo_full', JSON.stringify(db));
+        render();
+    }
 
     function render(data = db) {
         const t = document.getElementById('cuerpo');
@@ -136,18 +190,55 @@
             t.innerHTML += `<tr>
                 <td><b>${r.estado}</b></td>
                 <td>${r.organismo}</td>
-                <td>${r.nombre}</td>
-                <td>${r.dni}</td>
-                <td>${r.funcion}</td>
-                <td>${r.vigencia}</td>
+                <td>${r.nombre}<br><small>${r.dni}</small></td>
+                <td>${r.funcion}<br><small>${r.nivel} - ${r.agrupamiento}</small></td>
+                <td>${r.desde}<br>${r.hasta}</td>
+                <td>D: ${r.pDepto}<br>R: ${r.pRRHH}</td>
                 <td>${r.obs}</td>
             </tr>`;
         });
     }
 
     function filtrar() {
-        const val = document.getElementById('buscador').value;
-        render(db.filter(i => String(i.dni).includes(val)));
+        const val = document.getElementById('buscador').value.toLowerCase();
+        render(db.filter(i => i.dni.includes(val) || i.nombre.toLowerCase().includes(val)));
+    }
+
+    function importar(input) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const wb = XLSX.read(data, {type:'array'});
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            json.forEach(f => {
+                db.push({
+                    id: Date.now() + Math.random(),
+                    estado: f.ESTADO || 'PENDIENTE',
+                    nombre: (f.AGENTE || '').toUpperCase(),
+                    dni: String(f.DNI || ''),
+                    nivel: f.NIVEL || '',
+                    funcion: (f.FUNCION || '').toUpperCase(),
+                    agrupamiento: f.AGRUPAMIENTO || '',
+                    organismo: f.ORGANISMO || 'APO',
+                    desde: f.DESDE || '', hasta: f.HASTA || '',
+                    pDepto: f.PRES_DEPTO || '', pRRHH: f.PRES_RRHH || '',
+                    obs: (f.OBS || '').toUpperCase()
+                });
+            });
+            guardar();
+            alert("Importación exitosa");
+        };
+        reader.readAsArrayBuffer(input.files[0]);
+    }
+
+    function exportar() {
+        let csv = "\uFEFFESTADO;ORGANISMO;AGENTE;DNI;NIVEL;FUNCION;DESDE;HASTA;OBS\n";
+        db.forEach(r => { csv += `${r.estado};${r.organismo};${r.nombre};${r.dni};${r.nivel};${r.funcion};${r.desde};${r.hasta};${r.obs}\n`; });
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Reporte_APO.csv";
+        link.click();
     }
 </script>
 </body>
