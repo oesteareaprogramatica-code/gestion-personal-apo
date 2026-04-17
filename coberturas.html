@@ -27,7 +27,7 @@
         .search-input { flex-grow: 1; padding: 10px; border: 2px solid #003366; border-radius: 4px; font-size: 1rem; }
 
         .table-container { border: 1px solid #ddd; border-radius: 4px; overflow: auto; flex-grow: 1; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 1000px; }
         th { background: var(--primary); color: white; position: sticky; top: 0; padding: 12px; text-align: left; z-index: 10; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
         tr:nth-child(even) { background-color: #f9f9f9; }
@@ -48,19 +48,30 @@
             <div class="section-title">Datos del Agente</div>
             <label>Apellido y Nombre</label><input type="text" id="nombre" required>
             <label>DNI</label><input type="number" id="dni" required>
+            <label>Nivel</label><select id="nivel"><option>A1</option><option>A2</option><option>B1</option><option>C</option></select>
             <label>Función</label><input type="text" id="funcion" required>
+            <label>Agrupamiento</label><select id="agrupamiento"><option>ASISTENCIAL</option><option>NO ASISTENCIAL</option></select>
         </div>
 
         <div class="section">
-            <div class="section-title">Organismo</div>
+            <div class="section-title">Organismo (Efector)</div>
             <select id="organismo">
-                <option>APO</option><option>TAFI VIEJO</option><option>LULES</option><option>FAMAILLA</option>
+                <option>APO</option>
+                <option>HOSP. TAFI DEL VALLE</option>
+                <option>HOSP. LULES</option>
+                <option>HOSP. FAMAILLA</option>
+                <option>ÁREA OPERATIVA LULES</option>
+                <option>ÁREA OPERATIVA FAMAILLA</option>
+                <option>ÁREA OPERATIVA TAFI DEL VALLE</option>
             </select>
         </div>
 
         <div class="section">
-            <div class="section-title">Vigencia</div>
-            <input type="text" id="vigencia" placeholder="Desde - Hasta">
+            <div class="section-title">Vigencia y Presentación</div>
+            <label>Desde</label><input type="date" id="desde">
+            <label>Hasta</label><input type="date" id="hasta">
+            <label>Pres. Depto</label><input type="date" id="pres_depto">
+            <label>Pres. RRHH</label><input type="date" id="pres_rrhh">
         </div>
 
         <div class="section">
@@ -69,7 +80,6 @@
         </div>
 
         <button type="submit" class="btn-submit">Registrar Cobertura</button>
-        
         <input type="file" id="inputExcel" accept=".xlsx, .xls" style="display:none;" onchange="procesarExcel(this)">
         <button type="button" class="btn-import" onclick="document.getElementById('inputExcel').click()">📥 Importar desde Excel</button>
     </form>
@@ -87,10 +97,10 @@
                 <tr>
                     <th>Estado</th>
                     <th>Organismo</th>
-                    <th>Agente</th>
-                    <th>DNI</th>
-                    <th>Función</th>
-                    <th>Vigencia</th>
+                    <th>Agente / DNI</th>
+                    <th>Cargo / Nivel</th>
+                    <th>Desde / Hasta</th>
+                    <th>Presentación</th>
                     <th>Observación</th>
                 </tr>
             </thead>
@@ -110,9 +120,14 @@
             estado: document.getElementById('estado').value,
             nombre: document.getElementById('nombre').value.toUpperCase(),
             dni: document.getElementById('dni').value,
+            nivel: document.getElementById('nivel').value,
             funcion: document.getElementById('funcion').value.toUpperCase(),
+            agrupamiento: document.getElementById('agrupamiento').value,
             organismo: document.getElementById('organismo').value,
-            vigencia: document.getElementById('vigencia').value,
+            desde: document.getElementById('desde').value || '--',
+            hasta: document.getElementById('hasta').value || '--',
+            pDepto: document.getElementById('pres_depto').value || '--',
+            pRRHH: document.getElementById('pres_rrhh').value || '--',
             obs: document.getElementById('obs').value.toUpperCase() || 'SIN OBS.'
         });
         localStorage.setItem('db_final_v5', JSON.stringify(db));
@@ -120,33 +135,34 @@
         this.reset();
     });
 
-    // Función para procesar el archivo Excel
     function procesarExcel(input) {
         const file = input.files[0];
         const reader = new FileReader();
-
         reader.onload = function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
             jsonData.forEach(fila => {
                 db.push({
                     id: Date.now() + Math.random(),
                     estado: fila.ESTADO || 'PENDIENTE',
-                    nombre: (fila.AGENTE || fila.NOMBRE || '').toUpperCase(),
+                    nombre: (fila.AGENTE || '').toUpperCase(),
                     dni: String(fila.DNI || ''),
+                    nivel: fila.NIVEL || '',
                     funcion: (fila.FUNCION || '').toUpperCase(),
+                    agrupamiento: fila.AGRUPAMIENTO || '',
                     organismo: fila.ORGANISMO || 'APO',
-                    vigencia: fila.VIGENCIA || '',
-                    obs: (fila.OBSERVACION || fila.OBS || 'IMPORTADO').toUpperCase()
+                    desde: fila.DESDE || '',
+                    hasta: fila.HASTA || '',
+                    pDepto: fila.PRES_DEPTO || '',
+                    pRRHH: fila.PRES_RRHH || '',
+                    obs: (fila.OBS || '').toUpperCase()
                 });
             });
-
             localStorage.setItem('db_final_v5', JSON.stringify(db));
             render();
-            alert("¡Datos importados con éxito!");
+            alert("¡Importación exitosa!");
             input.value = ""; 
         };
         reader.readAsArrayBuffer(file);
@@ -159,10 +175,10 @@
             t.innerHTML += `<tr>
                 <td><b>${r.estado}</b></td>
                 <td>${r.organismo}</td>
-                <td>${r.nombre}</td>
-                <td>${r.dni}</td>
-                <td>${r.funcion}</td>
-                <td>${r.vigencia}</td>
+                <td>${r.nombre}<br><small>${r.dni}</small></td>
+                <td>${r.funcion}<br><small>${r.nivel} - ${r.agrupamiento}</small></td>
+                <td>${r.desde}<br>${r.hasta}</td>
+                <td>D:${r.pDepto}<br>R:${r.pRRHH}</td>
                 <td>${r.obs}</td>
             </tr>`;
         });
