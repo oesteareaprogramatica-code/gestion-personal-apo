@@ -10,8 +10,8 @@
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* BARRA LATERAL IZQUIERDA */
-        .sidebar { width: 450px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
+        /* BARRA LATERAL IZQUIERDA EXACTA */
+        .sidebar { width: 450px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); flex-shrink: 0; }
         .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 10px; border-radius: 4px; }
         
         .section { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
@@ -31,7 +31,7 @@
         .btn-import { background: #28a745; color: white; margin-top: 8px; font-size: 0.75rem; }
 
         /* CONTENIDO PRINCIPAL DERECHA */
-        .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; }
+        .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; min-width: 0; }
         .search-container { background: #e1e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-left: 5px solid var(--primary); }
         .search-input { flex-grow: 1; padding: 10px; border: 2px solid var(--primary); border-radius: 4px; font-size: 1rem; font-weight: bold; }
         
@@ -90,13 +90,14 @@
         </div>
 
         <div class="section">
-            <div class="section-title">Organismo (Efector)</div>
+            <div class="section-title">Organismo y Control Temporal</div>
             <div class="form-group">
+                <label>ORGANISMO (EFECTOR)</label>
                 <select id="organismo" required>
                     <option value="">Seleccione...</option>
-                    <option>APO</option><option>CADILLAL</option><option>TAFI DEL VALLE</option>
-                    <option>TAFI VIEJO</option><option>SAN PABLO</option><option>FAMAILLA</option>
-                    <option>ALTA MONTAÑA</option><option>LULES</option><option>VALLES CALCHAQUIES</option>
+                    <option>APO</option><option>AO VALLES CALCHAQUIES</option><option>TAFI DEL VALLE</option>
+                    <option>TAFI VIEJO</option><option>CADILLAL</option><option>TRANCAS</option>
+                    <option>ALTA MONTAÑA</option><option>FAMAILLA</option><option>SAN PABLO</option><option>LULES</option>
                 </select>
             </div>
             <div class="row">
@@ -286,7 +287,7 @@
                 });
             });
             guardarYRefrescar();
-            alert("¡Importación exitosa!");
+            alert("¡Importación exitosa! Estados vacíos = PENDIENTE.");
             input.value = "";
         };
         reader.readAsArrayBuffer(file);
