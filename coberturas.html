@@ -82,6 +82,7 @@
                     <select id="agrupamiento">
                         <option value="ASISTENCIAL">ASIST.</option>
                         <option value="NO ASISTENCIAL">NO ASIST.</option>
+                        <option value="SIN ESPECIFICAR">S/E</option>
                     </select>
                 </div>
             </div>
@@ -93,15 +94,9 @@
                 <label>ORGANISMO (EFECTOR)</label>
                 <select id="organismo" required>
                     <option value="">Seleccione...</option>
-                    <option>APO</option>
-                    <option>CADILLAL</option>
-                    <option>TAFI DEL VALLE</option>
-                    <option>TAFI VIEJO</option>
-                    <option>SAN PABLO</option>
-                    <option>FAMAILLA</option>
-                    <option>ALTA MONTAÑA</option>
-                    <option>LULES</option>
-                    <option>VALLES CALCHAQUIES</option>
+                    <option>APO</option><option>CADILLAL</option><option>TAFI DEL VALLE</option>
+                    <option>TAFI VIEJO</option><option>SAN PABLO</option><option>FAMAILLA</option>
+                    <option>ALTA MONTAÑA</option><option>LULES</option><option>VALLES CALCHAQUIES</option>
                 </select>
             </div>
             <div class="row">
@@ -274,24 +269,30 @@
             const registros = XLSX.utils.sheet_to_json(sheet);
 
             registros.forEach(fila => {
+                // Lógica para el Estado (Pendiente si está vacío)
+                let estadoExcel = (fila.ESTADO || 'PENDIENTE').toUpperCase();
+                
+                // Lógica para Agrupamiento (Deja en blanco/Sin especificar si está vacío)
+                let agrupExcel = (fila.AGRUPAMIENTO || 'SIN ESPECIFICAR').toUpperCase();
+
                 baseDatos.push({
                     id: Date.now() + Math.random(),
-                    estado: (fila.ESTADO || 'PENDIENTE').toUpperCase(),
-                    nombre: (fila.AGENTE || fila.NOMBRE || '').toUpperCase(),
-                    dni: String(fila.DNI || ''),
+                    estado: estadoExcel,
+                    nombre: (fila.AGENTE || fila.NOMBRE || 'S/N').toUpperCase(),
+                    dni: String(fila.DNI || '0'),
                     nivel: fila.NIVEL || 'A1',
-                    funcion: (fila.FUNCION || '').toUpperCase(),
-                    agrupamiento: (fila.AGRUPAMIENTO || 'ASISTENCIAL').toUpperCase(),
+                    funcion: (fila.FUNCION || 'S/F').toUpperCase(),
+                    agrupamiento: agrupExcel,
                     organismo: fila.ORGANISMO || 'APO',
                     desde: fila.DESDE || '---',
                     hasta: fila.HASTA || '---',
                     pres_oficina: fila.PRES_DEPTO || fila.PRES_OFICINA || '---',
                     pres_rrhh: fila.PRES_RRHH || '---',
-                    observacion: (fila.OBSERVACION || fila.OBS || 'SIN OBSERVACIONES').toUpperCase()
+                    observacion: (fila.OBSERVACION || fila.OBS || 'IMPORTADO').toUpperCase()
                 });
             });
             guardarYRefrescar();
-            alert("¡Importación de Excel completada!");
+            alert("¡Importación exitosa! Los estados vacíos se marcaron como PENDIENTE.");
             input.value = "";
         };
         reader.readAsArrayBuffer(file);
@@ -300,9 +301,7 @@
     function exportarCSV() {
         let csv = "\uFEFF--- REPORTE COBERTURAS APO ---\n";
         csv += "ESTADO;ORGANISMO;AGENTE;DNI;NIVEL;FUNCION;AGRUPAMIENTO;DESDE;HASTA;PRES_DEPTO;PRES_RRHH;OBSERVACION\n";
-        
         let stats = { aut: 0, pend: 0, baja: 0, asist: 0, noAsist: 0 };
-
         baseDatos.forEach(r => {
             csv += `${r.estado};${r.organismo};${r.nombre};${r.dni};${r.nivel};${r.funcion};${r.agrupamiento};${r.desde};${r.hasta};${r.pres_oficina};${r.pres_rrhh};${r.observacion}\n`;
             if(r.estado === "AUTORIZADO") stats.aut++;
@@ -311,19 +310,11 @@
             if(r.agrupamiento === "ASISTENCIAL") stats.asist++;
             if(r.agrupamiento === "NO ASISTENCIAL") stats.noAsist++;
         });
-
-        csv += "\n\n--- ANALISIS ESTADISTICO ---\n";
-        csv += `TOTAL REGISTROS;${baseDatos.length}\n`;
-        csv += `AUTORIZADOS;${stats.aut}\n`;
-        csv += `PENDIENTES;${stats.pend}\n`;
-        csv += `BAJAS;${stats.baja}\n`;
-        csv += `PERSONAL ASISTENCIAL;${stats.asist}\n`;
-        csv += `PERSONAL NO ASISTENCIAL;${stats.noAsist}\n`;
-
+        csv += `\nAUTORIZADOS;${stats.aut}\nPENDIENTES;${stats.pend}\nBAJAS;${stats.baja}\n`;
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", `COBERTURAS_APO_V5_${new Date().toLocaleDateString()}.csv`);
+        link.setAttribute("download", `Reporte_APO.csv`);
         link.click();
     }
 </script>
