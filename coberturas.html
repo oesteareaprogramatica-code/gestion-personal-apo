@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cobertura de Servicio APO - Gestión y Análisis</title>
+    <title>Cobertura de Servicio APO - Gestión Integral</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; --warning: #ffc107; --danger: #dc3545; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
-        /* Ajuste para que todo sea visible */
         body { background: var(--light); margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; }
         
-        /* BARRA LATERAL IZQUIERDA - AJUSTADA */
-        .sidebar { width: 400px; min-width: 400px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); z-index: 100; }
+        /* PANEL IZQUIERDO - FORMULARIO COMPLETO */
+        .sidebar { width: 420px; min-width: 420px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
         .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 10px; border-radius: 4px; }
         
         .section { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
@@ -22,30 +20,35 @@
         .form-group { margin-bottom: 8px; }
         label { display: block; font-size: 0.65rem; font-weight: bold; margin-bottom: 2px; color: #444; }
         input, select, textarea { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; }
+        textarea { height: 60px; resize: none; }
         
         .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
+        .btn-import { background: #28a745; margin-top: 8px; }
 
-        /* CONTENIDO PRINCIPAL (DERECHA) */
-        .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+        /* PANEL DERECHO - TABLA Y BUSQUEDA */
+        .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; min-width: 0; }
+        .header-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .search-container { background: #e1e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-left: 5px solid var(--primary); }
         .search-input { flex-grow: 1; padding: 10px; border: 2px solid var(--primary); border-radius: 4px; font-size: 1rem; font-weight: bold; }
         
         .table-container { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: auto; flex-grow: 1; border: 1px solid #ddd; }
         table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
         th { background: var(--primary); color: white; position: sticky; top: 0; padding: 10px; text-align: left; z-index: 10; }
-        td { padding: 8px; border-bottom: 1px solid #eee; }
+        td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: top; }
         
         .status-autorizado { background-color: #d4edda !important; }
         .status-baja { background-color: #f8d7da !important; }
         .status-pendiente { background-color: #fff3cd !important; }
 
         .btn-action { padding: 4px 8px; border: none; border-radius: 3px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
+        .btn-edit { background: var(--warning); margin-right: 5px; }
+        .btn-delete { background: var(--danger); color: white; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <div class="sidebar-header"><h2>GESTIÓN APO</h2></div>
+    <div class="sidebar-header"><h2>GESTIÓN RRHH - APO</h2></div>
     <form id="coberturaForm">
         <input type="hidden" id="editIndex" value="-1">
         
@@ -61,7 +64,10 @@
         <div class="section">
             <div class="section-title">Datos del Agente</div>
             <div class="form-group"><label>APELLIDO Y NOMBRE</label><input type="text" id="nombre" required></div>
-            <div class="form-group"><label>DNI</label><input type="number" id="dni" required></div>
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group" style="flex: 2;"><label>DNI</label><input type="number" id="dni" required></div>
+                <div class="form-group" style="flex: 1;"><label>NIVEL</label><input type="text" id="nivel"></div>
+            </div>
             <div class="form-group"><label>FUNCIÓN</label><input type="text" id="funcion"></div>
             <div class="form-group">
                 <label>AGRUPAMIENTO</label>
@@ -73,33 +79,44 @@
         </div>
 
         <div class="section">
-            <div class="section-title">Vigencia y Control</div>
-            <div class="form-group"><label>ORGANISMO</label><input type="text" id="organismo" value="APO"></div>
-            <div style="display:flex; gap:5px;">
+            <div class="section-title">Ubicación y Fechas</div>
+            <div class="form-group"><label>ORGANISMO (EFECTOR)</label><input type="text" id="organismo" value="APO"></div>
+            <div style="display: flex; gap: 8px;">
                 <div class="form-group"><label>DESDE</label><input type="date" id="desde"></div>
                 <div class="form-group"><label>HASTA</label><input type="date" id="hasta"></div>
             </div>
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group"><label>PRES. DEPTO</label><input type="date" id="pres_oficina"></div>
+                <div class="form-group"><label>PRES. RRHH</label><input type="date" id="pres_rrhh"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Observaciones</div>
+            <textarea id="observacion"></textarea>
         </div>
 
         <button type="submit" id="btnGuardar" class="btn-save">GUARDAR REGISTRO</button>
+        <button type="button" class="btn-save btn-import" onclick="document.getElementById('importFile').click()">📥 IMPORTAR EXCEL</button>
+        <input type="file" id="importFile" style="display:none" accept=".xlsx, .xls" onchange="importar(this)">
     </form>
 </div>
 
 <div class="main-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+    <div class="header-main">
         <h2 style="color:var(--primary); margin:0;">Registro de Coberturas Provisorias</h2>
-        <button onclick="exportarExcelConAnalisis()" style="background:#1f7244; color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">📊 DESCARGAR EXCEL + ANÁLISIS</button>
+        <button onclick="exportarExcelFinal()" style="background:#1f7244; color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">📊 DESCARGAR EXCEL + ANÁLISIS</button>
     </div>
 
     <div class="search-container">
-        <input type="text" id="inputBusqueda" class="search-input" placeholder="🔍 Buscar por DNI o Nombre..." oninput="filtrar()">
+        <input type="text" id="inputBusqueda" class="search-input" placeholder="🔍 Buscar por Nombre o DNI..." oninput="filtrar()">
     </div>
 
     <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>ACCIONES</th><th>ESTADO</th><th>ORGANISMO</th><th>AGENTE / DNI</th><th>FUNCIÓN</th><th>VIGENCIA</th>
+                    <th>ACCIONES</th><th>ESTADO</th><th>ORGANISMO</th><th>AGENTE / DNI / NIVEL</th><th>FUNCIÓN / AGRUP.</th><th>VIGENCIA</th><th>OBSERVACIÓN</th>
                 </tr>
             </thead>
             <tbody id="cuerpoTabla"></tbody>
@@ -108,48 +125,53 @@
 </div>
 
 <script>
-    let baseDatos = JSON.parse(localStorage.getItem('db_cobertura_v5')) || [];
+    let baseDatos = JSON.parse(localStorage.getItem('db_apo_v5_final')) || [];
     render(baseDatos);
 
     document.getElementById('coberturaForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const index = document.getElementById('editIndex').value;
-        const nuevo = {
+        const registro = {
             id: Date.now(),
             estado: document.getElementById('estado').value,
             nombre: document.getElementById('nombre').value.toUpperCase(),
             dni: document.getElementById('dni').value,
+            nivel: document.getElementById('nivel').value.toUpperCase(),
             funcion: document.getElementById('funcion').value.toUpperCase(),
             agrupamiento: document.getElementById('agrupamiento').value,
-            organismo: document.getElementById('organismo').value,
+            organismo: document.getElementById('organismo').value.toUpperCase(),
             desde: document.getElementById('desde').value || '---',
-            hasta: document.getElementById('hasta').value || '---'
+            hasta: document.getElementById('hasta').value || '---',
+            pres_oficina: document.getElementById('pres_oficina').value || '---',
+            pres_rrhh: document.getElementById('pres_rrhh').value || '---',
+            observacion: document.getElementById('observacion').value.toUpperCase() || '---'
         };
 
-        if (index === "-1") { baseDatos.push(nuevo); } 
-        else { baseDatos[index] = nuevo; document.getElementById('editIndex').value = "-1"; }
+        if (index === "-1") { baseDatos.push(registro); } 
+        else { baseDatos[index] = registro; document.getElementById('editIndex').value = "-1"; }
         
-        guardarYRefrescar();
-        this.reset();
-    });
-
-    function guardarYRefrescar() {
-        localStorage.setItem('db_cobertura_v5', JSON.stringify(baseDatos));
+        localStorage.setItem('db_apo_v5_final', JSON.stringify(baseDatos));
         render(baseDatos);
-    }
+        this.reset();
+        document.getElementById('btnGuardar').innerText = "GUARDAR REGISTRO";
+    });
 
     function render(datos) {
         const t = document.getElementById('cuerpoTabla');
         t.innerHTML = "";
-        [...datos].reverse().forEach((r, i) => {
+        [...datos].reverse().forEach((r) => {
             let clase = r.estado === "AUTORIZADO" ? "status-autorizado" : (r.estado === "BAJA" ? "status-baja" : "status-pendiente");
             t.innerHTML += `<tr class="${clase}">
-                <td><button class="btn-action" onclick="editar(${baseDatos.indexOf(r)})">✏️</button></td>
+                <td>
+                    <button class="btn-action btn-edit" onclick="editar(${baseDatos.indexOf(r)})">✏️</button>
+                    <button class="btn-action btn-delete" onclick="eliminar(${baseDatos.indexOf(r)})">🗑️</button>
+                </td>
                 <td><b>${r.estado}</b></td>
                 <td>${r.organismo}</td>
-                <td><b>${r.nombre}</b><br><small>${r.dni}</small></td>
-                <td>${r.funcion}</td>
-                <td>${r.desde} / ${r.hasta}</td>
+                <td><b>${r.nombre}</b><br>DNI: ${r.dni} | NV: ${r.nivel}</td>
+                <td>${r.funcion}<br><small>${r.agrupamiento}</small></td>
+                <td>${r.desde} al ${r.hasta}</td>
+                <td style="max-width:150px; overflow:hidden;">${r.observacion}</td>
             </tr>`;
         });
     }
@@ -161,24 +183,72 @@
 
     function editar(i) {
         const r = baseDatos[i];
+        document.getElementById('editIndex').value = i;
         document.getElementById('estado').value = r.estado;
         document.getElementById('nombre').value = r.nombre;
         document.getElementById('dni').value = r.dni;
+        document.getElementById('nivel').value = r.nivel;
         document.getElementById('funcion').value = r.funcion;
         document.getElementById('agrupamiento').value = r.agrupamiento;
         document.getElementById('organismo').value = r.organismo;
-        document.getElementById('editIndex').value = i;
+        document.getElementById('desde').value = r.desde === '---' ? '' : r.desde;
+        document.getElementById('hasta').value = r.hasta === '---' ? '' : r.hasta;
+        document.getElementById('pres_oficina').value = r.pres_oficina === '---' ? '' : r.pres_oficina;
+        document.getElementById('pres_rrhh').value = r.pres_rrhh === '---' ? '' : r.pres_rrhh;
+        document.getElementById('observacion').value = r.observacion === '---' ? '' : r.observacion;
         document.getElementById('btnGuardar').innerText = "ACTUALIZAR DATOS";
     }
 
-    // FUNCIÓN DE EXPORTACIÓN CON ANÁLISIS ESTADÍSTICO
-    function exportarExcelConAnalisis() {
+    function eliminar(i) {
+        if(confirm("¿Eliminar registro?")) {
+            baseDatos.splice(i, 1);
+            localStorage.setItem('db_apo_v5_final', JSON.stringify(baseDatos));
+            render(baseDatos);
+        }
+    }
+
+    function importar(input) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const raw = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            raw.forEach(f => {
+                baseDatos.push({
+                    id: Date.now() + Math.random(),
+                    estado: (f.ESTADO || 'PENDIENTE').toUpperCase(),
+                    nombre: (f.AGENTE || 'S/N').toUpperCase(),
+                    dni: String(f.DNI || '0'),
+                    nivel: (f.NIVEL || '-').toUpperCase(),
+                    funcion: (f.FUNCION || '-').toUpperCase(),
+                    agrupamiento: (f.AGRUPAMIENTO || 'ASISTENCIAL').toUpperCase(),
+                    organismo: (f.ORGANISMO || 'APO').toUpperCase(),
+                    desde: f.DESDE || '---',
+                    hasta: f.HASTA || '---',
+                    pres_oficina: f.PRES_DEPTO || '---',
+                    pres_rrhh: f.PRES_RRHH || '---',
+                    observacion: (f.OBSERVACION || '---').toUpperCase()
+                });
+            });
+            localStorage.setItem('db_apo_v5_final', JSON.stringify(baseDatos));
+            render(baseDatos);
+            alert("Excel importado con éxito.");
+        };
+        reader.readAsArrayBuffer(input.files[0]);
+    }
+
+    function exportarExcelFinal() {
         if (baseDatos.length === 0) return alert("No hay datos");
 
+        // 1. Datos del Listado Principal
         const ws1_data = baseDatos.map(r => ({
-            "ESTADO": r.estado, "AGENTE": r.nombre, "DNI": r.dni, "FUNCIÓN": r.funcion, "AGRUP.": r.agrupamiento, "DESDE": r.desde, "HASTA": r.hasta
+            "ESTADO": r.estado, "ORGANISMO": r.organismo, "AGENTE": r.nombre, "DNI": r.dni,
+            "NIVEL": r.nivel, "FUNCION": r.funcion, "AGRUPAMIENTO": r.agrupamiento,
+            "DESDE": r.desde, "HASTA": r.hasta, "PRES_DEPTO": r.pres_oficina,
+            "PRES_RRHH": r.pres_rrhh, "OBSERVACION": r.observacion
         }));
 
+        // 2. Cálculo de Estadísticas
         let s = { aut: 0, pend: 0, baj: 0, asi: 0, noa: 0 };
         baseDatos.forEach(r => {
             if(r.estado === "AUTORIZADO") s.aut++;
@@ -198,8 +268,8 @@
         ];
 
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws1_data), "Listado");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws2_data), "Estadísticas");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws1_data), "Listado Coberturas");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws2_data), "Estadísticas APO");
         XLSX.writeFile(wb, "Reporte_Coberturas_APO.xlsx");
     }
 </script>
