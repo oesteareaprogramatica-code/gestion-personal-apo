@@ -11,7 +11,7 @@
         body { background: var(--light); margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; }
         
         /* PANEL IZQUIERDO - FORMULARIO COMPLETO */
-        .sidebar { width: 420px; min-width: 420px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
+        .sidebar { width: 450px; min-width: 450px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
         .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 10px; border-radius: 4px; }
         
         .section { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
@@ -20,10 +20,9 @@
         .form-group { margin-bottom: 8px; }
         label { display: block; font-size: 0.65rem; font-weight: bold; margin-bottom: 2px; color: #444; }
         input, select, textarea { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; }
-        textarea { height: 60px; resize: none; }
+        textarea { height: 50px; resize: none; }
         
         .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
-        .btn-import { background: #28a745; margin-top: 8px; }
 
         /* PANEL DERECHO - TABLA Y BUSQUEDA */
         .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; min-width: 0; }
@@ -79,8 +78,19 @@
         </div>
 
         <div class="section">
-            <div class="section-title">Ubicación y Fechas</div>
-            <div class="form-group"><label>ORGANISMO (EFECTOR)</label><input type="text" id="organismo" value="APO"></div>
+            <div class="section-title">Organismo y Fechas</div>
+            <div class="form-group">
+                <label>ORGANISMO (EFECTOR)</label>
+                <select id="organismo">
+                    <option value="APO">APO</option>
+                    <option value="AO VALLES CALCHAQUIES">AO VALLES CALCHAQUIES</option>
+                    <option value="TAFI DEL VALLE">TAFI DEL VALLE</option>
+                    <option value="TAFI VIEJO">TAFI VIEJO</option>
+                    <option value="TRANCAS">TRANCAS</option>
+                    <option value="LULES">LULES</option>
+                    <option value="FAMAILLA">FAMAILLA</option>
+                </select>
+            </div>
             <div style="display: flex; gap: 8px;">
                 <div class="form-group"><label>DESDE</label><input type="date" id="desde"></div>
                 <div class="form-group"><label>HASTA</label><input type="date" id="hasta"></div>
@@ -97,8 +107,6 @@
         </div>
 
         <button type="submit" id="btnGuardar" class="btn-save">GUARDAR REGISTRO</button>
-        <button type="button" class="btn-save btn-import" onclick="document.getElementById('importFile').click()">📥 IMPORTAR EXCEL</button>
-        <input type="file" id="importFile" style="display:none" accept=".xlsx, .xls" onchange="importar(this)">
     </form>
 </div>
 
@@ -125,7 +133,7 @@
 </div>
 
 <script>
-    let baseDatos = JSON.parse(localStorage.getItem('db_apo_v5_final')) || [];
+    let baseDatos = JSON.parse(localStorage.getItem('db_apo_v5_full')) || [];
     render(baseDatos);
 
     document.getElementById('coberturaForm').addEventListener('submit', function(e) {
@@ -139,7 +147,7 @@
             nivel: document.getElementById('nivel').value.toUpperCase(),
             funcion: document.getElementById('funcion').value.toUpperCase(),
             agrupamiento: document.getElementById('agrupamiento').value,
-            organismo: document.getElementById('organismo').value.toUpperCase(),
+            organismo: document.getElementById('organismo').value,
             desde: document.getElementById('desde').value || '---',
             hasta: document.getElementById('hasta').value || '---',
             pres_oficina: document.getElementById('pres_oficina').value || '---',
@@ -150,7 +158,7 @@
         if (index === "-1") { baseDatos.push(registro); } 
         else { baseDatos[index] = registro; document.getElementById('editIndex').value = "-1"; }
         
-        localStorage.setItem('db_apo_v5_final', JSON.stringify(baseDatos));
+        localStorage.setItem('db_apo_v5_full', JSON.stringify(baseDatos));
         render(baseDatos);
         this.reset();
         document.getElementById('btnGuardar').innerText = "GUARDAR REGISTRO";
@@ -171,7 +179,7 @@
                 <td><b>${r.nombre}</b><br>DNI: ${r.dni} | NV: ${r.nivel}</td>
                 <td>${r.funcion}<br><small>${r.agrupamiento}</small></td>
                 <td>${r.desde} al ${r.hasta}</td>
-                <td style="max-width:150px; overflow:hidden;">${r.observacion}</td>
+                <td title="${r.observacion}">${r.observacion.substring(0,20)}...</td>
             </tr>`;
         });
     }
@@ -202,53 +210,18 @@
     function eliminar(i) {
         if(confirm("¿Eliminar registro?")) {
             baseDatos.splice(i, 1);
-            localStorage.setItem('db_apo_v5_final', JSON.stringify(baseDatos));
+            localStorage.setItem('db_apo_v5_full', JSON.stringify(baseDatos));
             render(baseDatos);
         }
     }
 
-    function importar(input) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const raw = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            raw.forEach(f => {
-                baseDatos.push({
-                    id: Date.now() + Math.random(),
-                    estado: (f.ESTADO || 'PENDIENTE').toUpperCase(),
-                    nombre: (f.AGENTE || 'S/N').toUpperCase(),
-                    dni: String(f.DNI || '0'),
-                    nivel: (f.NIVEL || '-').toUpperCase(),
-                    funcion: (f.FUNCION || '-').toUpperCase(),
-                    agrupamiento: (f.AGRUPAMIENTO || 'ASISTENCIAL').toUpperCase(),
-                    organismo: (f.ORGANISMO || 'APO').toUpperCase(),
-                    desde: f.DESDE || '---',
-                    hasta: f.HASTA || '---',
-                    pres_oficina: f.PRES_DEPTO || '---',
-                    pres_rrhh: f.PRES_RRHH || '---',
-                    observacion: (f.OBSERVACION || '---').toUpperCase()
-                });
-            });
-            localStorage.setItem('db_apo_v5_final', JSON.stringify(baseDatos));
-            render(baseDatos);
-            alert("Excel importado con éxito.");
-        };
-        reader.readAsArrayBuffer(input.files[0]);
-    }
-
     function exportarExcelFinal() {
         if (baseDatos.length === 0) return alert("No hay datos");
-
-        // 1. Datos del Listado Principal
         const ws1_data = baseDatos.map(r => ({
             "ESTADO": r.estado, "ORGANISMO": r.organismo, "AGENTE": r.nombre, "DNI": r.dni,
-            "NIVEL": r.nivel, "FUNCION": r.funcion, "AGRUPAMIENTO": r.agrupamiento,
-            "DESDE": r.desde, "HASTA": r.hasta, "PRES_DEPTO": r.pres_oficina,
-            "PRES_RRHH": r.pres_rrhh, "OBSERVACION": r.observacion
+            "NIVEL": r.nivel, "FUNCIÓN": r.funcion, "AGRUPAMIENTO": r.agrupamiento,
+            "DESDE": r.desde, "HASTA": r.hasta, "PRES_DEPTO": r.pres_oficina, "PRES_RRHH": r.pres_rrhh, "OBSERVACIÓN": r.observacion
         }));
-
-        // 2. Cálculo de Estadísticas
         let s = { aut: 0, pend: 0, baj: 0, asi: 0, noa: 0 };
         baseDatos.forEach(r => {
             if(r.estado === "AUTORIZADO") s.aut++;
@@ -257,7 +230,6 @@
             if(r.agrupamiento === "ASISTENCIAL") s.asi++;
             if(r.agrupamiento === "NO ASISTENCIAL") s.noa++;
         });
-
         const ws2_data = [
             {"ANÁLISIS": "TOTAL REGISTROS", "CANTIDAD": baseDatos.length},
             {"ANÁLISIS": "AUTORIZADOS", "CANTIDAD": s.aut},
@@ -266,11 +238,10 @@
             {"ANÁLISIS": "PERSONAL ASISTENCIAL", "CANTIDAD": s.asi},
             {"ANÁLISIS": "PERSONAL NO ASISTENCIAL", "CANTIDAD": s.noa}
         ];
-
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws1_data), "Listado Coberturas");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws2_data), "Estadísticas APO");
-        XLSX.writeFile(wb, "Reporte_Coberturas_APO.xlsx");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws1_data), "Listado");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws2_data), "Estadísticas");
+        XLSX.writeFile(wb, "Reporte_RRHH_APO.xlsx");
     }
 </script>
 </body>
