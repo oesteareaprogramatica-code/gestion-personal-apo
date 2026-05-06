@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cobertura APO - Gestión de Áreas</title>
+    <title>Gestión APO - Áreas Específicas</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; --warning: #ffc107; --danger: #dc3545; }
@@ -63,9 +63,9 @@
                 <div class="form-group" style="flex: 1;">
                     <label>NIVEL</label>
                     <select id="nivel">
-                        <option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option>
-                        <option value="B1">B1</option><option value="B">B</option><option value="C">C</option>
-                        <option value="D">D</option><option value="E">E</option>
+                        <option value="A">A</option><option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option>
+                        <option value="B">B</option><option value="B1">B1</option>
+                        <option value="C">C</option><option value="D">D</option><option value="E">E</option>
                     </select>
                 </div>
             </div>
@@ -80,25 +80,20 @@
         </div>
 
         <div class="section">
-            <div class="section-title">Área / Organismo y Fechas</div>
+            <div class="section-title">Ubicación y Fechas</div>
             <div class="form-group">
-                <label>ORGANISMO (EFECTOR / ÁREA)</label>
+                <label>ORGANISMO / ÁREA</label>
                 <select id="organismo">
-                    <option value="APO - DIRECCION">APO - DIRECCION</option>
-                    <option value="APO - RRHH">APO - RRHH</option>
-                    <option value="APO - ADMINISTRACION">APO - ADMINISTRACION</option>
-                    <option value="APO - ESTADISTICA">APO - ESTADISTICA</option>
-                    <option value="APO - MANTENIMIENTO">APO - MANTENIMIENTO</option>
-                    <option value="APO - INFORMATICA">APO - INFORMATICA</option>
-                    <option value="HOSP. TAFI DEL VALLE">HOSP. TAFI DEL VALLE</option>
-                    <option value="HOSP. TAFI VIEJO">HOSP. TAFI VIEJO</option>
-                    <option value="HOSP. TRANCAS">HOSP. TRANCAS</option>
-                    <option value="HOSP. LULES">HOSP. LULES</option>
-                    <option value="HOSP. FAMAILLA">HOSP. FAMAILLA</option>
-                    <option value="CAPS - ZONA CENTRO">CAPS - ZONA CENTRO</option>
-                    <option value="CAPS - ZONA NORTE">CAPS - ZONA NORTE</option>
-                    <option value="CAPS - ZONA SUR">CAPS - ZONA SUR</option>
-                    <option value="AREA PROGRAMATICA OESTE">AREA PROGRAMATICA OESTE</option>
+                    <option value="FAMAILLA">FAMAILLA</option>
+                    <option value="ALTA MONTAÑA">ALTA MONTAÑA</option>
+                    <option value="LULES">LULES</option>
+                    <option value="SAN PABLO">SAN PABLO</option>
+                    <option value="TRANCAS">TRANCAS</option>
+                    <option value="CADILLAL">CADILLAL</option>
+                    <option value="TAFI DEL VALLE">TAFI DEL VALLE</option>
+                    <option value="TAFI VIEJO">TAFI VIEJO</option>
+                    <option value="VALLES CALCHAQUIES">VALLES CALCHAQUIES</option>
+                    <option value="APO">APO</option>
                 </select>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -122,19 +117,19 @@
 
 <div class="main-content">
     <div class="header-main">
-        <h2 style="color:var(--primary); margin:0;">Registro de Coberturas Provisorias</h2>
-        <button onclick="exportarExcelFinal()" style="background:#1f7244; color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">📊 DESCARGAR EXCEL + ANÁLISIS</button>
+        <h2 style="color:var(--primary); margin:0;">Registro Cobertura APO</h2>
+        <button onclick="exportarExcelFinal()" style="background:#1f7244; color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">📊 EXCEL + ANÁLISIS</button>
     </div>
 
     <div class="search-container">
-        <input type="text" id="inputBusqueda" class="search-input" placeholder="🔍 Buscar por Nombre o DNI..." oninput="filtrar()">
+        <input type="text" id="inputBusqueda" class="search-input" placeholder="🔍 Buscar Agente o DNI..." oninput="filtrar()">
     </div>
 
     <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>ACCIONES</th><th>ESTADO</th><th>ORGANISMO</th><th>AGENTE / DNI / NIVEL</th><th>FUNCIÓN / AGRUP.</th><th>VIGENCIA</th><th>OBSERVACIÓN</th>
+                    <th>ACCIONES</th><th>ESTADO</th><th>ÁREA</th><th>AGENTE / DNI / NV</th><th>FUNCIÓN</th><th>VIGENCIA</th><th>OBSERVACIÓN</th>
                 </tr>
             </thead>
             <tbody id="cuerpoTabla"></tbody>
@@ -143,7 +138,7 @@
 </div>
 
 <script>
-    let baseDatos = JSON.parse(localStorage.getItem('db_apo_v5_areas')) || [];
+    let baseDatos = JSON.parse(localStorage.getItem('db_apo_final_v6')) || [];
     render(baseDatos);
 
     document.getElementById('coberturaForm').addEventListener('submit', function(e) {
@@ -168,7 +163,7 @@
         if (index === "-1") { baseDatos.push(registro); } 
         else { baseDatos[index] = registro; document.getElementById('editIndex').value = "-1"; }
         
-        localStorage.setItem('db_apo_v5_areas', JSON.stringify(baseDatos));
+        localStorage.setItem('db_apo_final_v6', JSON.stringify(baseDatos));
         render(baseDatos);
         this.reset();
         document.getElementById('btnGuardar').innerText = "GUARDAR REGISTRO";
@@ -185,8 +180,8 @@
                 <td>${r.organismo}</td>
                 <td><b>${r.nombre}</b><br>DNI: ${r.dni} | NV: ${r.nivel}</td>
                 <td>${r.funcion}<br><small>${r.agrupamiento}</small></td>
-                <td>${r.desde} al ${r.hasta}</td>
-                <td>${r.observacion.substring(0,25)}...</td>
+                <td>${r.desde} / ${r.hasta}</td>
+                <td>${r.observacion.substring(0,30)}</td>
             </tr>`;
         });
     }
@@ -211,21 +206,35 @@
         document.getElementById('pres_oficina').value = r.pres_oficina === '---' ? '' : r.pres_oficina;
         document.getElementById('pres_rrhh').value = r.pres_rrhh === '---' ? '' : r.pres_rrhh;
         document.getElementById('observacion').value = r.observacion === '---' ? '' : r.observacion;
-        document.getElementById('btnGuardar').innerText = "ACTUALIZAR DATOS";
+        document.getElementById('btnGuardar').innerText = "ACTUALIZAR";
     }
 
     function exportarExcelFinal() {
+        if (baseDatos.length === 0) return alert("No hay datos");
         const ws1_data = baseDatos.map(r => ({
             "ESTADO": r.estado, "ÁREA": r.organismo, "AGENTE": r.nombre, "DNI": r.dni, "NIVEL": r.nivel,
-            "FUNCIÓN": r.funcion, "AGRUP.": r.agrupamiento, "DESDE": r.desde, "HASTA": r.hasta, "OBS": r.observacion
+            "FUNCIÓN": r.funcion, "AGRUPAMIENTO": r.agrupamiento, "DESDE": r.desde, "HASTA": r.hasta,
+            "PRES_DEPTO": r.pres_oficina, "PRES_RRHH": r.pres_rrhh, "OBSERVACIÓN": r.observacion
         }));
+        
+        let s = { aut: 0, pend: 0, baj: 0 };
+        baseDatos.forEach(r => {
+            if(r.estado === "AUTORIZADO") s.aut++;
+            if(r.estado === "PENDIENTE") s.pend++;
+            if(r.estado === "BAJA") s.baj++;
+        });
+
+        const ws2_data = [
+            {"ESTADÍSTICA": "TOTAL REGISTROS", "VALOR": baseDatos.length},
+            {"ESTADÍSTICA": "AUTORIZADOS", "VALOR": s.aut},
+            {"ESTADÍSTICA": "PENDIENTES", "VALOR": s.pend},
+            {"ESTADÍSTICA": "BAJAS", "VALOR": s.baj}
+        ];
+
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws1_data), "Listado");
-        XLSX.writeFile(wb, "Gestion_RRHH_Oeste.xlsx");
-    }
-</script>
-</body>
-</html>
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws1_data), "Listado General");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws2_data), "Estadísticas");
+        XLSX.writeFile(wb, "Reporte_RRHH_Oeste_Final.xlsx");
     }
 </script>
 </body>
