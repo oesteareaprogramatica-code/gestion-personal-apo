@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cobertura de Servicio APO - Gestión Integral</title>
+    <title>Cobertura APO - Gestión de Áreas</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #003366; --secondary: #00509d; --accent: #00d1b2; --light: #f4f7f9; --warning: #ffc107; --danger: #dc3545; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--light); margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; }
         
-        /* PANEL IZQUIERDO - FORMULARIO COMPLETO */
         .sidebar { width: 450px; min-width: 450px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; border-right: 4px solid var(--primary); }
         .sidebar-header { text-align: center; margin-bottom: 15px; background: var(--primary); color: white; padding: 10px; border-radius: 4px; }
         
@@ -24,7 +23,6 @@
         
         .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
 
-        /* PANEL DERECHO - TABLA Y BUSQUEDA */
         .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; min-width: 0; }
         .header-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .search-container { background: #e1e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-left: 5px solid var(--primary); }
@@ -38,10 +36,7 @@
         .status-autorizado { background-color: #d4edda !important; }
         .status-baja { background-color: #f8d7da !important; }
         .status-pendiente { background-color: #fff3cd !important; }
-
         .btn-action { padding: 4px 8px; border: none; border-radius: 3px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
-        .btn-edit { background: var(--warning); margin-right: 5px; }
-        .btn-delete { background: var(--danger); color: white; }
     </style>
 </head>
 <body>
@@ -65,7 +60,14 @@
             <div class="form-group"><label>APELLIDO Y NOMBRE</label><input type="text" id="nombre" required></div>
             <div style="display: flex; gap: 8px;">
                 <div class="form-group" style="flex: 2;"><label>DNI</label><input type="number" id="dni" required></div>
-                <div class="form-group" style="flex: 1;"><label>NIVEL</label><input type="text" id="nivel"></div>
+                <div class="form-group" style="flex: 1;">
+                    <label>NIVEL</label>
+                    <select id="nivel">
+                        <option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option>
+                        <option value="B1">B1</option><option value="B">B</option><option value="C">C</option>
+                        <option value="D">D</option><option value="E">E</option>
+                    </select>
+                </div>
             </div>
             <div class="form-group"><label>FUNCIÓN</label><input type="text" id="funcion"></div>
             <div class="form-group">
@@ -78,17 +80,25 @@
         </div>
 
         <div class="section">
-            <div class="section-title">Organismo y Fechas</div>
+            <div class="section-title">Área / Organismo y Fechas</div>
             <div class="form-group">
-                <label>ORGANISMO (EFECTOR)</label>
+                <label>ORGANISMO (EFECTOR / ÁREA)</label>
                 <select id="organismo">
-                    <option value="APO">APO</option>
-                    <option value="AO VALLES CALCHAQUIES">AO VALLES CALCHAQUIES</option>
-                    <option value="TAFI DEL VALLE">TAFI DEL VALLE</option>
-                    <option value="TAFI VIEJO">TAFI VIEJO</option>
-                    <option value="TRANCAS">TRANCAS</option>
-                    <option value="LULES">LULES</option>
-                    <option value="FAMAILLA">FAMAILLA</option>
+                    <option value="APO - DIRECCION">APO - DIRECCION</option>
+                    <option value="APO - RRHH">APO - RRHH</option>
+                    <option value="APO - ADMINISTRACION">APO - ADMINISTRACION</option>
+                    <option value="APO - ESTADISTICA">APO - ESTADISTICA</option>
+                    <option value="APO - MANTENIMIENTO">APO - MANTENIMIENTO</option>
+                    <option value="APO - INFORMATICA">APO - INFORMATICA</option>
+                    <option value="HOSP. TAFI DEL VALLE">HOSP. TAFI DEL VALLE</option>
+                    <option value="HOSP. TAFI VIEJO">HOSP. TAFI VIEJO</option>
+                    <option value="HOSP. TRANCAS">HOSP. TRANCAS</option>
+                    <option value="HOSP. LULES">HOSP. LULES</option>
+                    <option value="HOSP. FAMAILLA">HOSP. FAMAILLA</option>
+                    <option value="CAPS - ZONA CENTRO">CAPS - ZONA CENTRO</option>
+                    <option value="CAPS - ZONA NORTE">CAPS - ZONA NORTE</option>
+                    <option value="CAPS - ZONA SUR">CAPS - ZONA SUR</option>
+                    <option value="AREA PROGRAMATICA OESTE">AREA PROGRAMATICA OESTE</option>
                 </select>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -133,7 +143,7 @@
 </div>
 
 <script>
-    let baseDatos = JSON.parse(localStorage.getItem('db_apo_v5_full')) || [];
+    let baseDatos = JSON.parse(localStorage.getItem('db_apo_v5_areas')) || [];
     render(baseDatos);
 
     document.getElementById('coberturaForm').addEventListener('submit', function(e) {
@@ -144,7 +154,7 @@
             estado: document.getElementById('estado').value,
             nombre: document.getElementById('nombre').value.toUpperCase(),
             dni: document.getElementById('dni').value,
-            nivel: document.getElementById('nivel').value.toUpperCase(),
+            nivel: document.getElementById('nivel').value,
             funcion: document.getElementById('funcion').value.toUpperCase(),
             agrupamiento: document.getElementById('agrupamiento').value,
             organismo: document.getElementById('organismo').value,
@@ -158,7 +168,7 @@
         if (index === "-1") { baseDatos.push(registro); } 
         else { baseDatos[index] = registro; document.getElementById('editIndex').value = "-1"; }
         
-        localStorage.setItem('db_apo_v5_full', JSON.stringify(baseDatos));
+        localStorage.setItem('db_apo_v5_areas', JSON.stringify(baseDatos));
         render(baseDatos);
         this.reset();
         document.getElementById('btnGuardar').innerText = "GUARDAR REGISTRO";
@@ -170,16 +180,13 @@
         [...datos].reverse().forEach((r) => {
             let clase = r.estado === "AUTORIZADO" ? "status-autorizado" : (r.estado === "BAJA" ? "status-baja" : "status-pendiente");
             t.innerHTML += `<tr class="${clase}">
-                <td>
-                    <button class="btn-action btn-edit" onclick="editar(${baseDatos.indexOf(r)})">✏️</button>
-                    <button class="btn-action btn-delete" onclick="eliminar(${baseDatos.indexOf(r)})">🗑️</button>
-                </td>
+                <td><button class="btn-action" onclick="editar(${baseDatos.indexOf(r)})">✏️</button></td>
                 <td><b>${r.estado}</b></td>
                 <td>${r.organismo}</td>
                 <td><b>${r.nombre}</b><br>DNI: ${r.dni} | NV: ${r.nivel}</td>
                 <td>${r.funcion}<br><small>${r.agrupamiento}</small></td>
                 <td>${r.desde} al ${r.hasta}</td>
-                <td title="${r.observacion}">${r.observacion.substring(0,20)}...</td>
+                <td>${r.observacion.substring(0,25)}...</td>
             </tr>`;
         });
     }
@@ -207,41 +214,18 @@
         document.getElementById('btnGuardar').innerText = "ACTUALIZAR DATOS";
     }
 
-    function eliminar(i) {
-        if(confirm("¿Eliminar registro?")) {
-            baseDatos.splice(i, 1);
-            localStorage.setItem('db_apo_v5_full', JSON.stringify(baseDatos));
-            render(baseDatos);
-        }
-    }
-
     function exportarExcelFinal() {
-        if (baseDatos.length === 0) return alert("No hay datos");
         const ws1_data = baseDatos.map(r => ({
-            "ESTADO": r.estado, "ORGANISMO": r.organismo, "AGENTE": r.nombre, "DNI": r.dni,
-            "NIVEL": r.nivel, "FUNCIÓN": r.funcion, "AGRUPAMIENTO": r.agrupamiento,
-            "DESDE": r.desde, "HASTA": r.hasta, "PRES_DEPTO": r.pres_oficina, "PRES_RRHH": r.pres_rrhh, "OBSERVACIÓN": r.observacion
+            "ESTADO": r.estado, "ÁREA": r.organismo, "AGENTE": r.nombre, "DNI": r.dni, "NIVEL": r.nivel,
+            "FUNCIÓN": r.funcion, "AGRUP.": r.agrupamiento, "DESDE": r.desde, "HASTA": r.hasta, "OBS": r.observacion
         }));
-        let s = { aut: 0, pend: 0, baj: 0, asi: 0, noa: 0 };
-        baseDatos.forEach(r => {
-            if(r.estado === "AUTORIZADO") s.aut++;
-            if(r.estado === "PENDIENTE") s.pend++;
-            if(r.estado === "BAJA") s.baj++;
-            if(r.agrupamiento === "ASISTENCIAL") s.asi++;
-            if(r.agrupamiento === "NO ASISTENCIAL") s.noa++;
-        });
-        const ws2_data = [
-            {"ANÁLISIS": "TOTAL REGISTROS", "CANTIDAD": baseDatos.length},
-            {"ANÁLISIS": "AUTORIZADOS", "CANTIDAD": s.aut},
-            {"ANÁLISIS": "PENDIENTES", "CANTIDAD": s.pend},
-            {"ANÁLISIS": "BAJAS", "CANTIDAD": s.baj},
-            {"ANÁLISIS": "PERSONAL ASISTENCIAL", "CANTIDAD": s.asi},
-            {"ANÁLISIS": "PERSONAL NO ASISTENCIAL", "CANTIDAD": s.noa}
-        ];
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws1_data), "Listado");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ws2_data), "Estadísticas");
-        XLSX.writeFile(wb, "Reporte_RRHH_APO.xlsx");
+        XLSX.writeFile(wb, "Gestion_RRHH_Oeste.xlsx");
+    }
+</script>
+</body>
+</html>
     }
 </script>
 </body>
